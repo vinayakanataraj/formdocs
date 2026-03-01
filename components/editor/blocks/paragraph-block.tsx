@@ -2,6 +2,7 @@
 
 import type { Block } from "@/lib/types";
 import { useEditorStore } from "@/lib/store/editor";
+import { useEffect, useRef } from "react";
 
 interface Props {
   block: Block;
@@ -12,6 +13,13 @@ interface Props {
 export default function ParagraphBlock({ block, onChange, readOnly }: Props) {
   const { openSlashCommand } = useEditorStore();
   const props = block.properties as { text?: string };
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (ref.current && document.activeElement !== ref.current) {
+      ref.current.innerHTML = props.text ?? "";
+    }
+  }, [props.text]);
 
   function handleInput(e: React.FormEvent<HTMLDivElement>) {
     const text = (e.target as HTMLDivElement).innerText;
@@ -28,12 +36,12 @@ export default function ParagraphBlock({ block, onChange, readOnly }: Props) {
 
   return (
     <div
+      ref={ref}
       contentEditable={!readOnly}
       suppressContentEditableWarning
       onInput={handleInput}
       data-placeholder="Type '/' for commands, or start writing…"
       className="text-base outline-none w-full min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/30"
-      dangerouslySetInnerHTML={{ __html: props.text ?? "" }}
     />
   );
 }
