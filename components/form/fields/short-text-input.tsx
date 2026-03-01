@@ -15,7 +15,7 @@ export default function ShortTextInput({ block }: { block: Block }) {
         type="text"
         {...register(block.id)}
         placeholder={p.placeholder}
-        className={`w-full px-3 py-2.5 text-sm border rounded-lg bg-background focus:outline-none focus:ring-2 transition-colors ${
+        className={`w-full px-3 py-2.5 text-sm border rounded-[4px] bg-background focus:outline-none focus:ring-2 transition-colors ${
           error ? "border-destructive focus:ring-destructive/20" : "border-border focus:ring-ring/50"
         }`}
       />

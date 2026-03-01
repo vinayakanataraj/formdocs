@@ -47,7 +47,7 @@ export default function ListBlock({ block, onChange, readOnly }: Props) {
               onChange={(e) => handleItemChange(idx, e.target.value)}
               onKeyDown={(e) => handleKeyDown(idx, e)}
               placeholder="List item"
-              className="w-full bg-transparent outline-none placeholder:text-muted-foreground/30"
+              className="w-full bg-transparent outline-none placeholder:text-muted-foreground/25"
             />
           )}
         </li>

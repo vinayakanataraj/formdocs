@@ -15,7 +15,7 @@ export default function EditorHeader({ onSave, isSaving, isDirty, saveError }: E
   const { form } = useEditorStore();
 
   return (
-    <header className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-background z-10">
+    <header className="flex items-center justify-between px-4 py-2 border-b border-border/30 bg-background z-10">
       <div className="flex items-center gap-3">
         <Link
           href="/admin"
@@ -50,7 +50,7 @@ export default function EditorHeader({ onSave, isSaving, isDirty, saveError }: E
         <Link
           href={`/f/${form.meta.slug}`}
           target="_blank"
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-border rounded-md hover:bg-muted transition-colors"
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-border/50 rounded-[4px] hover:bg-muted transition-colors"
         >
           <Eye className="w-3.5 h-3.5" />
           Preview
@@ -59,7 +59,7 @@ export default function EditorHeader({ onSave, isSaving, isDirty, saveError }: E
         <button
           onClick={onSave}
           disabled={isSaving || !isDirty}
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-primary text-primary-foreground rounded-[4px] hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <Save className="w-3.5 h-3.5" />
           Save

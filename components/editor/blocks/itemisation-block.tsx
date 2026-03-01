@@ -10,20 +10,20 @@ interface Props { block: Block; onChange: (p: any) => void; readOnly?: boolean; 
 
 export default function ItemisationBlock({ block, onChange, readOnly }: Props) {
   const p = block.properties as ItemisationProps;
-  const { addChildBlock, deleteChildBlock } = useEditorStore();
+  const { addChildBlock, deleteChildBlock, selectBlock, setActivePanel, selectedBlockId } = useEditorStore();
   const templateFields = block.children ?? [];
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden">
+    <div className="border border-border rounded-[4px] overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-muted/50 border-b border-border">
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-muted/40 border-b border-border">
         <Table className="w-4 h-4 text-muted-foreground" />
         <input
           type="text"
           value={typeof (block.properties as any).label === "string" ? (block.properties as any).label : ""}
           onChange={(e) => onChange({ label: e.target.value })}
           placeholder="Itemisation label"
-          className="text-sm font-medium bg-transparent outline-none flex-1 placeholder:text-muted-foreground/40"
+          className="text-sm font-medium bg-transparent outline-none flex-1 placeholder:text-muted-foreground/60"
           readOnly={readOnly}
         />
         <span className="text-xs text-muted-foreground">
@@ -40,21 +40,33 @@ export default function ItemisationBlock({ block, onChange, readOnly }: Props) {
           </div>
         ) : (
           <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${Math.min(templateFields.length, 4)}, 1fr)` }}>
-            {templateFields.map((child) => (
-              <div key={child.id} className="relative group/child">
-                <div className="border border-border rounded p-2 bg-background">
-                  <BlockRenderer block={child} readOnly={readOnly} />
-                </div>
-                {!readOnly && (
-                  <button
-                    onClick={() => deleteChildBlock(block.id, child.id)}
-                    className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center rounded-full bg-destructive text-white opacity-0 group-hover/child:opacity-100 transition-opacity"
+            {templateFields.map((child) => {
+              const isChildSelected = selectedBlockId === child.id;
+              return (
+                <div key={child.id} className="relative group/child">
+                  <div
+                    className={`border rounded-[3px] p-2 bg-background cursor-pointer transition-colors ${
+                      isChildSelected ? "border-ring ring-1 ring-ring/50" : "border-border hover:border-ring/50"
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      selectBlock(child.id);
+                      setActivePanel("field-config");
+                    }}
                   >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                )}
-              </div>
-            ))}
+                    <BlockRenderer block={child} readOnly={readOnly} />
+                  </div>
+                  {!readOnly && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); deleteChildBlock(block.id, child.id); }}
+                      className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center rounded-full bg-destructive text-white opacity-0 group-hover/child:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
@@ -67,7 +79,7 @@ export default function ItemisationBlock({ block, onChange, readOnly }: Props) {
               <button
                 key={def.type}
                 onClick={() => addChildBlock(block.id, def.type)}
-                className="flex items-center gap-1 text-xs px-2 py-1 border border-dashed border-border rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                className="flex items-center gap-1 text-xs px-2 py-1 border border-dashed border-border rounded-[3px] hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
               >
                 <Plus className="w-3 h-3" />
                 {def.label}

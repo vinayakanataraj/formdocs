@@ -21,7 +21,7 @@ export default function CalloutBlock({ block, onChange, readOnly }: Props) {
   }, [props.text]);
 
   return (
-    <div className="flex gap-3 p-4 rounded-lg bg-muted border border-border">
+    <div className="flex gap-3 p-4 rounded-[3px] bg-sidebar border-none">
       {!readOnly ? (
         <input
           type="text"
@@ -39,7 +39,7 @@ export default function CalloutBlock({ block, onChange, readOnly }: Props) {
         suppressContentEditableWarning
         onInput={(e) => onChange({ text: (e.target as HTMLDivElement).innerText })}
         data-placeholder="Write a callout…"
-        className="text-sm flex-1 outline-none min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/30"
+        className="text-sm flex-1 outline-none min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50"
       />
     </div>
   );

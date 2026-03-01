@@ -10,7 +10,7 @@ export default function PageBreakBlock({ block, onChange, readOnly }: Props) {
   return (
     <div className="relative flex items-center gap-3 py-2">
       <div className="flex-1 border-t border-dashed border-border" />
-      <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-muted text-xs text-muted-foreground">
+      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-muted border-none text-xs text-muted-foreground">
         <span>Page Break</span>
         {!readOnly && (
           <input
@@ -18,7 +18,7 @@ export default function PageBreakBlock({ block, onChange, readOnly }: Props) {
             value={p.label ?? ""}
             onChange={(e) => onChange({ label: e.target.value })}
             placeholder="Page label (optional)"
-            className="bg-transparent outline-none text-xs w-28 placeholder:text-muted-foreground/40"
+            className="bg-transparent outline-none text-xs w-28 placeholder:text-muted-foreground/60"
           />
         )}
       </div>

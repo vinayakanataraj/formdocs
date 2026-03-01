@@ -19,36 +19,36 @@ export default function BlockActions({ block }: BlockActionsProps) {
   const isField = FIELD_TYPES.has(block.type);
 
   return (
-    <div className="flex items-center gap-0.5 bg-background border border-border rounded-md shadow-sm p-0.5 -mt-1">
+    <div className="flex items-center gap-0.5 bg-background border border-border/60 rounded-[4px] shadow-[var(--shadow-notion-sm)] p-0.5 -mt-0.5">
       {isField && (
         <button
           onClick={() => setActivePanel("field-config")}
           title="Configure field"
-          className="flex items-center justify-center w-7 h-7 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+          className="flex items-center justify-center w-6 h-6 rounded-[3px] hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
         >
-          <Settings className="w-3.5 h-3.5" />
+          <Settings className="w-3 h-3" />
         </button>
       )}
       <button
         onClick={() => openSlashCommand(block.id)}
         title="Add block below"
-        className="flex items-center justify-center w-7 h-7 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+        className="flex items-center justify-center w-6 h-6 rounded-[3px] hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
       >
-        <Plus className="w-3.5 h-3.5" />
+        <Plus className="w-3 h-3" />
       </button>
       <button
         onClick={() => duplicateBlock(block.id)}
         title="Duplicate block"
-        className="flex items-center justify-center w-7 h-7 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+        className="flex items-center justify-center w-6 h-6 rounded-[3px] hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
       >
-        <Copy className="w-3.5 h-3.5" />
+        <Copy className="w-3 h-3" />
       </button>
       <button
         onClick={() => deleteBlock(block.id)}
         title="Delete block"
-        className="flex items-center justify-center w-7 h-7 rounded hover:bg-destructive/10 hover:text-destructive transition-colors text-muted-foreground"
+        className="flex items-center justify-center w-6 h-6 rounded-[3px] hover:bg-destructive/10 hover:text-destructive transition-colors text-muted-foreground"
       >
-        <Trash2 className="w-3.5 h-3.5" />
+        <Trash2 className="w-3 h-3" />
       </button>
     </div>
   );

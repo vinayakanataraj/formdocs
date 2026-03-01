@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { FormMeta } from "@/lib/types";
-import { Edit, ExternalLink, Trash2, Copy } from "lucide-react";
+import { Edit, ExternalLink, Trash2, Copy, FileText } from "lucide-react";
 
 interface FormCardProps {
   meta: FormMeta;
@@ -53,53 +53,60 @@ export default function FormCard({ meta }: FormCardProps) {
   });
 
   return (
-    <div className="border border-border rounded-lg p-4 bg-card hover:border-ring/50 transition-colors group">
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            {meta.iconEmoji && <span className="text-lg">{meta.iconEmoji}</span>}
-            <h3 className="font-medium text-sm truncate">{meta.title || "Untitled Form"}</h3>
-          </div>
-          {meta.description && (
-            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{meta.description}</p>
-          )}
-        </div>
+    <div className="group flex items-center gap-3 px-3 py-2 rounded-[3px] hover:bg-muted/60 transition-colors">
+      {/* Icon */}
+      <div className="shrink-0 w-5 text-center">
+        {meta.iconEmoji ? (
+          <span className="text-base leading-none">{meta.iconEmoji}</span>
+        ) : (
+          <FileText className="w-4 h-4 text-muted-foreground/40" />
+        )}
       </div>
 
-      <p className="text-xs text-muted-foreground mb-4">
-        Updated {updatedDate} · <code className="font-mono text-[11px]">/f/{meta.slug}</code>
-      </p>
+      {/* Title */}
+      <Link
+        href={`/admin/forms/${meta.slug}`}
+        className="flex-1 min-w-0 text-sm truncate hover:underline underline-offset-2"
+      >
+        {meta.title || "Untitled Form"}
+      </Link>
 
-      <div className="flex items-center gap-1">
+      {/* Date — always visible */}
+      <span className="text-xs text-muted-foreground shrink-0 hidden sm:block">
+        {updatedDate}
+      </span>
+
+      {/* Actions — hover only */}
+      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
         <Link
           href={`/admin/forms/${meta.slug}`}
-          className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md hover:bg-muted transition-colors"
+          title="Edit"
+          className="flex items-center justify-center w-7 h-7 rounded-[3px] hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
         >
-          <Edit className="w-3 h-3" />
-          Edit
+          <Edit className="w-3.5 h-3.5" />
         </Link>
         <Link
           href={`/f/${meta.slug}`}
           target="_blank"
-          className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md hover:bg-muted transition-colors"
+          title="Preview"
+          className="flex items-center justify-center w-7 h-7 rounded-[3px] hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ExternalLink className="w-3 h-3" />
-          Preview
+          <ExternalLink className="w-3.5 h-3.5" />
         </Link>
         <button
           onClick={handleDuplicate}
-          className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md hover:bg-muted transition-colors"
+          title="Duplicate"
+          className="flex items-center justify-center w-7 h-7 rounded-[3px] hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
         >
-          <Copy className="w-3 h-3" />
-          Duplicate
+          <Copy className="w-3.5 h-3.5" />
         </button>
         <button
           onClick={handleDelete}
           disabled={deleting}
-          className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors ml-auto"
+          title="Delete"
+          className="flex items-center justify-center w-7 h-7 rounded-[3px] hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
         >
-          <Trash2 className="w-3 h-3" />
-          {deleting ? "…" : "Delete"}
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>

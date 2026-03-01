@@ -20,14 +20,14 @@ export default function QuoteBlock({ block, onChange, readOnly }: Props) {
   }, [props.text]);
 
   return (
-    <blockquote className="border-l-[3px] border-border pl-4 py-1">
+    <blockquote className="border-l-[3px] border-foreground pl-4 py-1">
       <div
         ref={ref}
         contentEditable={!readOnly}
         suppressContentEditableWarning
         onInput={(e) => onChange({ text: (e.target as HTMLDivElement).innerText })}
         data-placeholder="Quote…"
-        className="text-base italic text-muted-foreground outline-none min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/30"
+        className="text-base outline-none min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/50"
       />
     </blockquote>
   );

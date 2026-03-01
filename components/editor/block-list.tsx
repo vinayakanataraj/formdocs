@@ -43,7 +43,7 @@ export default function BlockList() {
   }
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-0">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -61,7 +61,7 @@ export default function BlockList() {
 
         <DragOverlay>
           {activeBlock && (
-            <div className="opacity-80 bg-background shadow-lg rounded-md border border-border">
+            <div className="opacity-90 bg-background shadow-[var(--shadow-notion)] rounded-[4px] border border-border/50">
               <BlockRenderer block={activeBlock} readOnly />
             </div>
           )}
@@ -71,7 +71,7 @@ export default function BlockList() {
       {/* Add block button */}
       <button
         onClick={() => openSlashCommand(form.blocks[form.blocks.length - 1]?.id ?? null)}
-        className="flex items-center gap-2 text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors py-2 px-2 w-full rounded-md hover:bg-muted/50 group"
+        className="flex items-center gap-2 text-sm text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors py-2 px-2 w-full rounded-[3px] hover:bg-muted/30 group"
       >
         <Plus className="w-4 h-4 shrink-0" />
         <span className="group-hover:opacity-100 opacity-0 transition-opacity text-xs">

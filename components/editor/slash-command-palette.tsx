@@ -100,8 +100,8 @@ export default function SlashCommandPalette() {
       <div className="fixed inset-0 z-40" onClick={closeSlashCommand} />
 
       {/* Palette */}
-      <div className="fixed left-1/2 top-1/3 -translate-x-1/2 z-50 w-[340px] bg-popover border border-border rounded-lg shadow-xl overflow-hidden">
-        <div className="p-2 border-b border-border">
+      <div className="fixed left-1/2 top-1/3 -translate-x-1/2 z-50 w-[340px] bg-popover border border-border rounded-[6px] shadow-[var(--shadow-notion)] overflow-hidden">
+        <div className="p-2 border-b border-border/50">
           <input
             ref={inputRef}
             value={slashCommandQuery}
@@ -118,7 +118,7 @@ export default function SlashCommandPalette() {
           ) : (
             Object.entries(grouped).map(([category, blocks]) => (
               <div key={category}>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-2 py-1.5 mt-1">
+                <p className="text-[11px] font-medium text-muted-foreground px-2 py-1.5 mt-1">
                   {CATEGORY_LABELS[category] ?? category}
                 </p>
                 {blocks.map((block) => {
@@ -130,11 +130,11 @@ export default function SlashCommandPalette() {
                     <button
                       key={block.type}
                       onClick={() => insertBlock(block.type)}
-                      className={`w-full flex items-center gap-3 px-2 py-2 rounded-md text-left transition-colors ${
-                        isSelected ? "bg-accent text-accent-foreground" : "hover:bg-muted"
+                      className={`w-full flex items-center gap-3 px-2 py-2 rounded-[3px] text-left transition-colors ${
+                        isSelected ? "bg-muted text-foreground" : "hover:bg-muted/60"
                       }`}
                     >
-                      <div className="w-8 h-8 flex items-center justify-center rounded-md border border-border bg-background shrink-0">
+                      <div className="w-8 h-8 flex items-center justify-center rounded-[3px] bg-muted shrink-0">
                         <Icon className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div className="min-w-0">

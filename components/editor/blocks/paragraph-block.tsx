@@ -41,7 +41,7 @@ export default function ParagraphBlock({ block, onChange, readOnly }: Props) {
       suppressContentEditableWarning
       onInput={handleInput}
       data-placeholder="Type '/' for commands, or start writing…"
-      className="text-base outline-none w-full min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/30"
+      className="text-base leading-[1.5] outline-none w-full min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/25"
     />
   );
 }

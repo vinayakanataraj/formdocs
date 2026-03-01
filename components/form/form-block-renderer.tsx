@@ -46,19 +46,19 @@ export default function FormBlockRenderer({ block, allValues }: Props) {
 
   switch (block.type) {
     // Content blocks (read-only)
-    case "heading1": return <h1 className="text-3xl font-bold">{p.text}</h1>;
-    case "heading2": return <h2 className="text-2xl font-semibold">{p.text}</h2>;
-    case "heading3": return <h3 className="text-xl font-semibold">{p.text}</h3>;
-    case "paragraph": return <p className="text-base text-foreground/90">{p.text}</p>;
+    case "heading1": return <h1 className="text-[30px] font-bold">{p.text}</h1>;
+    case "heading2": return <h2 className="text-[24px] font-semibold">{p.text}</h2>;
+    case "heading3": return <h3 className="text-[20px] font-semibold">{p.text}</h3>;
+    case "paragraph": return <p className="text-base text-foreground/90 leading-[1.5]">{p.text}</p>;
     case "bulleted_list":
       return <ul className="list-disc pl-5 space-y-1">{(p.items ?? []).map((item: string, i: number) => <li key={i}>{item}</li>)}</ul>;
     case "numbered_list":
       return <ol className="list-decimal pl-5 space-y-1">{(p.items ?? []).map((item: string, i: number) => <li key={i}>{item}</li>)}</ol>;
     case "quote":
-      return <blockquote className="border-l-[3px] border-border pl-4 py-1 italic text-muted-foreground">{p.text}</blockquote>;
+      return <blockquote className="border-l-[3px] border-foreground pl-4 py-1 text-muted-foreground">{p.text}</blockquote>;
     case "callout":
       return (
-        <div className="flex gap-3 p-4 rounded-lg bg-muted border border-border">
+        <div className="flex gap-3 p-4 rounded-[3px] bg-sidebar border-none">
           {p.emoji && <span className="text-lg">{p.emoji}</span>}
           <p className="text-sm">{p.text}</p>
         </div>

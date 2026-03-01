@@ -46,7 +46,7 @@ export default async function PublicFormPage({ params }: Props) {
         </div>
       )}
 
-      <div className="max-w-[720px] mx-auto px-6 py-12">
+      <div className="max-w-[720px] mx-auto px-6 py-12 md:px-16 lg:px-24">
         {/* Logo */}
         {form.meta.logoUrl && (
           <div className="mb-6">
@@ -58,9 +58,9 @@ export default async function PublicFormPage({ params }: Props) {
         {/* Form title */}
         <div className="mb-8">
           {form.meta.iconEmoji && (
-            <div className="text-4xl mb-2">{form.meta.iconEmoji}</div>
+            <div className="text-5xl mb-3">{form.meta.iconEmoji}</div>
           )}
-          <h1 className="text-3xl font-bold mb-2">{form.meta.title}</h1>
+          <h1 className="text-[40px] font-bold leading-tight mb-2">{form.meta.title}</h1>
           {form.meta.description && (
             <p className="text-muted-foreground">{form.meta.description}</p>
           )}

@@ -10,7 +10,7 @@ export default function MultiSelectField({ block, onChange, readOnly }: Props) {
   const options = p.options ?? [];
 
   return (
-    <FieldWrapper label={p.label} helpText={p.helpText} required={p.required}>
+    <FieldWrapper label={p.label} helpText={p.helpText} required={p.required} onLabelChange={(label) => onChange({ label })} readOnly={readOnly}>
       <div className="space-y-1.5">
         {options.map((opt, i) => (
           <label key={i} className="flex items-center gap-2 text-sm text-muted-foreground cursor-default">

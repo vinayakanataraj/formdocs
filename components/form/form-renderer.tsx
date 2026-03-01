@@ -183,7 +183,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
 
         {/* Error message */}
         {submitError && (
-          <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
+          <div className="p-4 rounded-[4px] bg-destructive/10 border-none text-sm text-destructive">
             {submitError}
             <button
               type="submit"
@@ -201,7 +201,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
             <button
               type="button"
               onClick={() => setCurrentPage((p) => p - 1)}
-              className="px-6 py-2.5 text-sm border border-border rounded-lg hover:bg-muted transition-colors"
+              className="px-6 py-2.5 text-sm border border-border rounded-[4px] hover:bg-muted transition-colors"
             >
               Back
             </button>
@@ -213,7 +213,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
             <button
               type="button"
               onClick={handleNext}
-              className="px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+              className="px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-[4px] hover:bg-primary/90 transition-colors"
               style={form.meta.accentColor ? { backgroundColor: form.meta.accentColor } : undefined}
             >
               Next
@@ -222,7 +222,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
             <button
               type="submit"
               disabled={submitting}
-              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-[4px] hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               style={form.meta.accentColor ? { backgroundColor: form.meta.accentColor } : undefined}
             >
               {submitting && <Loader2 className="w-4 h-4 animate-spin" />}

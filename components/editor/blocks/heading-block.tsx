@@ -12,9 +12,9 @@ interface Props {
 
 const TAG_MAP = { heading1: "h1", heading2: "h2", heading3: "h3" } as const;
 const CLASS_MAP = {
-  heading1: "text-3xl font-bold",
-  heading2: "text-2xl font-semibold",
-  heading3: "text-xl font-semibold",
+  heading1: "text-[30px] font-semibold leading-[1.2]",
+  heading2: "text-[24px] font-semibold leading-[1.3]",
+  heading3: "text-[20px] font-semibold leading-[1.3]",
 };
 
 export default function HeadingBlock({ block, onChange, readOnly }: Props) {
@@ -46,7 +46,7 @@ export default function HeadingBlock({ block, onChange, readOnly }: Props) {
       suppressContentEditableWarning
       onInput={handleInput}
       data-placeholder={`Heading ${Tag.replace("h", "")}`}
-      className={`${className} outline-none w-full min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/40`}
+      className={`${className} outline-none w-full min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/25`}
     />
   );
 }

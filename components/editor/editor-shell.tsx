@@ -52,19 +52,19 @@ export default function EditorShell({ initialForm }: EditorShellProps) {
   }, [isDirty, save]);
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
+    <div className="flex h-full flex-col overflow-hidden">
       <EditorHeader onSave={save} isSaving={isSaving} isDirty={isDirty} saveError={saveError} />
       <div className="flex flex-1 overflow-hidden">
         {/* Main canvas */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-[720px] mx-auto px-8 py-12">
+          <div className="max-w-[720px] mx-auto px-6 py-12 md:px-16 lg:px-24">
             {/* Form title */}
             <input
               type="text"
               value={form.meta.title}
               onChange={(e) => updateMeta({ title: e.target.value })}
               placeholder="Untitled Form"
-              className="w-full text-4xl font-bold bg-transparent border-none outline-none placeholder:text-muted-foreground/40 mb-2"
+              className="w-full text-[40px] font-bold leading-tight bg-transparent border-none outline-none placeholder:text-muted-foreground/25 mb-2"
             />
             {/* Form description */}
             <input
@@ -72,7 +72,7 @@ export default function EditorShell({ initialForm }: EditorShellProps) {
               value={form.meta.description ?? ""}
               onChange={(e) => updateMeta({ description: e.target.value })}
               placeholder="Add a description…"
-              className="w-full text-base text-muted-foreground bg-transparent border-none outline-none placeholder:text-muted-foreground/30 mb-8"
+              className="w-full text-base text-muted-foreground bg-transparent border-none outline-none placeholder:text-muted-foreground/20 mb-12"
             />
 
             <BlockList />

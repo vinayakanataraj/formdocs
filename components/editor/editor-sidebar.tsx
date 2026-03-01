@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { Block } from "@/lib/types";
 import { useEditorStore } from "@/lib/store/editor";
 import WebhookSettings from "@/components/admin/webhook-settings";
 import FormSettingsPanel from "@/components/admin/form-settings-panel";
@@ -9,13 +10,24 @@ import { Webhook, Settings, X } from "lucide-react";
 
 type Tab = "webhook" | "settings";
 
+function findBlockById(blocks: Block[], id: string): Block | undefined {
+  for (const b of blocks) {
+    if (b.id === id) return b;
+    if (b.children?.length) {
+      const found = findBlockById(b.children, id);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
 export default function EditorSidebar() {
   const { activePanel, setActivePanel, selectedBlockId, form } = useEditorStore();
   const [tab, setTab] = useState<Tab>("webhook");
 
   const isOpen = activePanel !== "none";
   const selectedBlock = selectedBlockId
-    ? form.blocks.find((b) => b.id === selectedBlockId)
+    ? findBlockById(form.blocks, selectedBlockId)
     : null;
 
   // Always show when a field is selected for config
@@ -30,13 +42,13 @@ export default function EditorSidebar() {
       {isOpen && (
         <>
           {/* Sidebar header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/50">
             {!showFieldConfig && (
               <div className="flex gap-1">
                 <button
                   onClick={() => { setTab("webhook"); setActivePanel("webhook"); }}
-                  className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md transition-colors ${
-                    tab === "webhook" && activePanel === "webhook" ? "bg-muted font-medium" : "text-muted-foreground hover:text-foreground"
+                  className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 transition-colors border-b-2 ${
+                    tab === "webhook" && activePanel === "webhook" ? "text-foreground font-medium border-foreground" : "text-muted-foreground hover:text-foreground border-transparent"
                   }`}
                 >
                   <Webhook className="w-3.5 h-3.5" />
@@ -44,8 +56,8 @@ export default function EditorSidebar() {
                 </button>
                 <button
                   onClick={() => { setTab("settings"); setActivePanel("settings"); }}
-                  className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md transition-colors ${
-                    tab === "settings" && activePanel === "settings" ? "bg-muted font-medium" : "text-muted-foreground hover:text-foreground"
+                  className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 transition-colors border-b-2 ${
+                    tab === "settings" && activePanel === "settings" ? "text-foreground font-medium border-foreground" : "text-muted-foreground hover:text-foreground border-transparent"
                   }`}
                 >
                   <Settings className="w-3.5 h-3.5" />
@@ -83,14 +95,14 @@ export default function EditorSidebar() {
           <button
             onClick={() => { setActivePanel("webhook"); setTab("webhook"); }}
             title="Webhook Settings"
-            className="flex items-center justify-center w-8 h-8 rounded-l-md border border-r-0 border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center justify-center w-8 h-8 rounded-l-[3px] border border-r-0 border-border bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
           >
             <Webhook className="w-4 h-4" />
           </button>
           <button
             onClick={() => { setActivePanel("settings"); setTab("settings"); }}
             title="Form Settings"
-            className="flex items-center justify-center w-8 h-8 rounded-l-md border border-r-0 border-border bg-background hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center justify-center w-8 h-8 rounded-l-[3px] border border-r-0 border-border bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
           >
             <Settings className="w-4 h-4" />
           </button>
