@@ -1,12 +1,10 @@
 "use client";
 
-import type { Block, FileUploadProps } from "@/lib/types";
+import type { FileUploadProps, EditorBlockProps } from "@/lib/types";
 import FieldWrapper from "./field-wrapper";
 import { Upload } from "lucide-react";
 
-interface Props { block: Block; onChange: (p: any) => void; readOnly?: boolean; }
-
-export default function FileUploadField({ block, onChange, readOnly }: Props) {
+export default function FileUploadField({ block, onChange, readOnly }: EditorBlockProps) {
   const p = block.properties as FileUploadProps;
   const maxMb = p.maxFileSizeMb ?? 10;
   const types = p.acceptedTypes?.join(", ") || "Any file type";

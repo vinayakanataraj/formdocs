@@ -13,7 +13,13 @@ interface EditorShellProps {
 }
 
 export default function EditorShell({ initialForm }: EditorShellProps) {
-  const { initForm, form, isDirty, isSaving, setIsSaving, markSaved, updateMeta } = useEditorStore();
+  const initForm = useEditorStore((s) => s.initForm);
+  const form = useEditorStore((s) => s.form);
+  const isDirty = useEditorStore((s) => s.isDirty);
+  const isSaving = useEditorStore((s) => s.isSaving);
+  const setIsSaving = useEditorStore((s) => s.setIsSaving);
+  const markSaved = useEditorStore((s) => s.markSaved);
+  const updateMeta = useEditorStore((s) => s.updateMeta);
   const [saveError, setSaveError] = useState<string | null>(null);
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -41,7 +47,7 @@ export default function EditorShell({ initialForm }: EditorShellProps) {
     } finally {
       setIsSaving(false);
     }
-  }, [form, markSaved]);
+  }, [form, markSaved, setIsSaving]);
 
   // Auto-save on change (debounced 2s)
   useEffect(() => {

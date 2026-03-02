@@ -1,11 +1,10 @@
 "use client";
 
-import type { Block, SingleSelectProps } from "@/lib/types";
+import type { SingleSelectProps, EditorBlockProps } from "@/lib/types";
+import { DISABLED_INPUT_CLASS } from "@/lib/constants";
 import FieldWrapper from "./field-wrapper";
 
-interface Props { block: Block; onChange: (p: any) => void; readOnly?: boolean; }
-
-export default function SingleSelectField({ block, onChange, readOnly }: Props) {
+export default function SingleSelectField({ block, onChange, readOnly }: EditorBlockProps) {
   const p = block.properties as SingleSelectProps;
   const options = p.options ?? [];
   const isRadio = p.display === "radio";
@@ -25,7 +24,7 @@ export default function SingleSelectField({ block, onChange, readOnly }: Props) 
       ) : (
         <select
           disabled
-          className="w-full px-3 py-2 text-sm border border-border rounded-[4px] bg-muted/40 text-muted-foreground cursor-default"
+          className={DISABLED_INPUT_CLASS}
         >
           <option value="">{p.placeholder || "Select an option…"}</option>
           {options.map((opt, i) => <option key={i} value={opt}>{opt}</option>)}

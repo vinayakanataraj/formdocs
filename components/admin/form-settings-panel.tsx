@@ -3,7 +3,8 @@
 import { useEditorStore } from "@/lib/store/editor";
 
 export default function FormSettingsPanel() {
-  const { form, updateMeta } = useEditorStore();
+  const form = useEditorStore((s) => s.form);
+  const updateMeta = useEditorStore((s) => s.updateMeta);
   const meta = form.meta;
 
   return (

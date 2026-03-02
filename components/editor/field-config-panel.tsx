@@ -42,7 +42,7 @@ function Toggle({ value, onChange, label }: { value?: boolean; onChange: (v: boo
 }
 
 export default function FieldConfigPanel({ block }: Props) {
-  const { updateBlock } = useEditorStore();
+  const updateBlock = useEditorStore((s) => s.updateBlock);
   const p = block.properties as any;
 
   function update(partial: Record<string, unknown>) {

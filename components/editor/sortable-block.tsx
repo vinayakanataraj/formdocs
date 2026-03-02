@@ -13,7 +13,9 @@ interface SortableBlockProps {
 }
 
 export default function SortableBlock({ block }: SortableBlockProps) {
-  const { selectedBlockId, selectBlock, openSlashCommand } = useEditorStore();
+  const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
+  const selectBlock = useEditorStore((s) => s.selectBlock);
+  const openSlashCommand = useEditorStore((s) => s.openSlashCommand);
   const isSelected = selectedBlockId === block.id;
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =

@@ -279,6 +279,14 @@ export interface WebhookPayload {
   itemisations: { [blockId: string]: WebhookItemisationRow[] };
 }
 
+// ─── Editor Block Props ────────────────────────────────────────────────────────
+
+export interface EditorBlockProps {
+  block: Block;
+  onChange: (props: any) => void;
+  readOnly?: boolean;
+}
+
 // ─── Editor State Types ────────────────────────────────────────────────────────
 
 export type EditorMode = "editor" | "preview";

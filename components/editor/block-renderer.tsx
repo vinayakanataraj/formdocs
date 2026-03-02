@@ -39,7 +39,7 @@ interface BlockRendererProps {
 }
 
 export default function BlockRenderer({ block, readOnly = false }: BlockRendererProps) {
-  const { updateBlock } = useEditorStore();
+  const updateBlock = useEditorStore((s) => s.updateBlock);
 
   const onChange = (props: Partial<Block["properties"]>) => {
     if (!readOnly) updateBlock(block.id, props);

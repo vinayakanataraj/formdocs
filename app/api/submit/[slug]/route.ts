@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getForm } from "@/lib/forms";
 import { isAdminRequestValid } from "@/lib/auth";
 import { buildSubmissionSchema } from "@/lib/validation/form-schema";
-import type { WebhookPayload } from "@/lib/types";
+import type { WebhookPayload, WebhookHeader } from "@/lib/types";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -24,6 +24,16 @@ function isSafeWebhookUrl(urlString: string): boolean {
   } catch {
     return false;
   }
+}
+
+// ─── Webhook header builder ───────────────────────────────────────────────────
+
+function buildHeaders(webhookHeaders: WebhookHeader[]): Record<string, string> {
+  const headers: Record<string, string> = {};
+  for (const { key, value } of webhookHeaders) {
+    if (key) headers[key] = value;
+  }
+  return headers;
 }
 
 // ─── Retry with exponential backoff ──────────────────────────────────────────
@@ -105,10 +115,7 @@ export async function POST(req: NextRequest, { params }: Params) {
       itemisations: submission.itemisations ?? {},
     };
 
-    const headers: Record<string, string> = {};
-    for (const { key, value } of form.webhook.headers) {
-      if (key) headers[key] = value;
-    }
+    const headers = buildHeaders(form.webhook.headers);
 
     let body: string;
     if (form.webhook.payloadFormat === "form_urlencoded") {
@@ -179,10 +186,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     itemisations: {},
   };
 
-  const headers: Record<string, string> = {};
-  for (const { key, value } of form.webhook.headers) {
-    if (key) headers[key] = value;
-  }
+  const headers = buildHeaders(form.webhook.headers);
   headers["Content-Type"] = "application/json";
 
   try {

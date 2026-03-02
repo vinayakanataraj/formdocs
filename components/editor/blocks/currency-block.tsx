@@ -1,11 +1,9 @@
 "use client";
 
-import type { Block, CurrencyProps } from "@/lib/types";
+import type { CurrencyProps, EditorBlockProps } from "@/lib/types";
 import FieldWrapper from "./field-wrapper";
 
-interface Props { block: Block; onChange: (p: any) => void; readOnly?: boolean; }
-
-export default function CurrencyField({ block, onChange, readOnly }: Props) {
+export default function CurrencyField({ block, onChange, readOnly }: EditorBlockProps) {
   const p = block.properties as CurrencyProps;
   const symbol = p.currencySymbol ?? "$";
   return (

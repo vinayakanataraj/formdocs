@@ -1,15 +1,9 @@
 "use client";
 
-import type { Block } from "@/lib/types";
+import type { EditorBlockProps } from "@/lib/types";
 import { useEffect, useRef } from "react";
 
-interface Props {
-  block: Block;
-  onChange: (props: any) => void;
-  readOnly?: boolean;
-}
-
-export default function CalloutBlock({ block, onChange, readOnly }: Props) {
+export default function CalloutBlock({ block, onChange, readOnly }: EditorBlockProps) {
   const props = block.properties as { text?: string; emoji?: string; backgroundColor?: string };
   const emoji = props.emoji ?? "💡";
   const ref = useRef<HTMLDivElement>(null);

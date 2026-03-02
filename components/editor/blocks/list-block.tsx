@@ -1,14 +1,8 @@
 "use client";
 
-import type { Block } from "@/lib/types";
+import type { EditorBlockProps } from "@/lib/types";
 
-interface Props {
-  block: Block;
-  onChange: (props: any) => void;
-  readOnly?: boolean;
-}
-
-export default function ListBlock({ block, onChange, readOnly }: Props) {
+export default function ListBlock({ block, onChange, readOnly }: EditorBlockProps) {
   const props = block.properties as { items?: string[] };
   const items = props.items ?? [""];
   const isOrdered = block.type === "numbered_list";

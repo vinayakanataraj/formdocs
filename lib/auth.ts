@@ -2,7 +2,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
-const SESSION_COOKIE = "formdocs_session";
+export const SESSION_COOKIE = "formdocs_session";
 const SESSION_MAX_AGE = 60 * 60 * 24; // 24 hours
 
 function getSecret(): Uint8Array {

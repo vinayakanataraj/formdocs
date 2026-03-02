@@ -1,11 +1,9 @@
 "use client";
 
-import type { Block, YesNoProps } from "@/lib/types";
+import type { YesNoProps, EditorBlockProps } from "@/lib/types";
 import FieldWrapper from "./field-wrapper";
 
-interface Props { block: Block; onChange: (p: any) => void; readOnly?: boolean; }
-
-export default function YesNoField({ block, onChange, readOnly }: Props) {
+export default function YesNoField({ block, onChange, readOnly }: EditorBlockProps) {
   const p = block.properties as YesNoProps;
 
   return (

@@ -1,16 +1,18 @@
 "use client";
 
-import type { Block, ItemisationProps } from "@/lib/types";
+import type { ItemisationProps, EditorBlockProps } from "@/lib/types";
 import { useEditorStore } from "@/lib/store/editor";
 import BlockRenderer from "@/components/editor/block-renderer";
 import { Plus, Table, Trash2 } from "lucide-react";
 import { FIELD_BLOCKS } from "@/lib/blocks/definitions";
 
-interface Props { block: Block; onChange: (p: any) => void; readOnly?: boolean; }
-
-export default function ItemisationBlock({ block, onChange, readOnly }: Props) {
+export default function ItemisationBlock({ block, onChange, readOnly }: EditorBlockProps) {
   const p = block.properties as ItemisationProps;
-  const { addChildBlock, deleteChildBlock, selectBlock, setActivePanel, selectedBlockId } = useEditorStore();
+  const addChildBlock = useEditorStore((s) => s.addChildBlock);
+  const deleteChildBlock = useEditorStore((s) => s.deleteChildBlock);
+  const selectBlock = useEditorStore((s) => s.selectBlock);
+  const setActivePanel = useEditorStore((s) => s.setActivePanel);
+  const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
   const templateFields = block.children ?? [];
 
   return (

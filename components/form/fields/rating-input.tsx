@@ -1,10 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import type { Block, RatingProps } from "@/lib/types";
 import FieldWrapper from "./field-wrapper";
 import { Star, Heart, ThumbsUp } from "lucide-react";
-import { useState } from "react";
 
 const ICONS = { stars: Star, hearts: Heart, thumbs: ThumbsUp };
 
@@ -14,6 +14,7 @@ export default function RatingInput({ block }: { block: Block }) {
   const error = (errors[block.id] as any)?.message;
   const max = p.maxStars ?? 5;
   const Icon = ICONS[p.iconStyle ?? "stars"];
+  const [hovered, setHovered] = useState<number | null>(null);
 
   return (
     <FieldWrapper label={p.label} helpText={p.helpText} required={p.required} error={error}>
@@ -21,7 +22,6 @@ export default function RatingInput({ block }: { block: Block }) {
         name={block.id}
         control={control}
         render={({ field }) => {
-          const [hovered, setHovered] = useState<number | null>(null);
           const current = hovered ?? field.value ?? 0;
 
           return (

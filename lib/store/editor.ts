@@ -4,37 +4,7 @@ import { create } from "zustand";
 import { nanoid } from "nanoid";
 import type { Block, BlockType, Form, FormMeta, WebhookConfig } from "@/lib/types";
 import { createBlock } from "@/lib/blocks/defaults";
-
-// ─── Default empty form ────────────────────────────────────────────────────────
-
-function defaultForm(slug: string = ""): Form {
-  return {
-    meta: {
-      title: "",
-      slug,
-      description: "",
-      coverImageUrl: "",
-      iconEmoji: "",
-      accentColor: "#0f172a",
-      logoUrl: "",
-      footerText: "",
-      submitButtonText: "Submit",
-      successMessage: "Thank you! Your response has been submitted.",
-      redirectUrl: "",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    webhook: {
-      url: "",
-      method: "POST",
-      headers: [{ key: "Content-Type", value: "application/json" }],
-      payloadFormat: "json",
-      retries: 2,
-      timeoutSeconds: 10,
-    },
-    blocks: [],
-  };
-}
+import { createDefaultForm } from "@/lib/form-defaults";
 
 // ─── Store Interface ───────────────────────────────────────────────────────────
 
@@ -110,7 +80,7 @@ function insertAfter(blocks: Block[], afterId: string | null | undefined, newBlo
 // ─── Store ─────────────────────────────────────────────────────────────────────
 
 export const useEditorStore = create<EditorStore>((set, get) => ({
-  form: defaultForm(),
+  form: createDefaultForm(""),
   selectedBlockId: null,
   activePanel: "none",
   isDirty: false,

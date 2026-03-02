@@ -1,11 +1,9 @@
 "use client";
 
-import type { Block, MultiSelectProps } from "@/lib/types";
+import type { MultiSelectProps, EditorBlockProps } from "@/lib/types";
 import FieldWrapper from "./field-wrapper";
 
-interface Props { block: Block; onChange: (p: any) => void; readOnly?: boolean; }
-
-export default function MultiSelectField({ block, onChange, readOnly }: Props) {
+export default function MultiSelectField({ block, onChange, readOnly }: EditorBlockProps) {
   const p = block.properties as MultiSelectProps;
   const options = p.options ?? [];
 

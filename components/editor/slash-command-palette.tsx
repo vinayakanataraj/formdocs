@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEditorStore } from "@/lib/store/editor";
-import { searchBlocks, BLOCK_DEFINITIONS, BlockDefinition } from "@/lib/blocks/definitions";
+import { searchBlocks, BlockDefinition } from "@/lib/blocks/definitions";
 import type { BlockType } from "@/lib/types";
 import * as Icons from "lucide-react";
-import { useState } from "react";
 
 const CATEGORY_LABELS: Record<string, string> = {
   content: "Content",
@@ -21,16 +20,14 @@ function getIcon(name: string) {
 }
 
 export default function SlashCommandPalette() {
-  const {
-    slashCommandOpen,
-    slashCommandQuery,
-    slashCommandBlockId,
-    closeSlashCommand,
-    addBlock,
-    setSlashQuery,
-    deleteBlock,
-    form,
-  } = useEditorStore();
+  const slashCommandOpen = useEditorStore((s) => s.slashCommandOpen);
+  const slashCommandQuery = useEditorStore((s) => s.slashCommandQuery);
+  const slashCommandBlockId = useEditorStore((s) => s.slashCommandBlockId);
+  const closeSlashCommand = useEditorStore((s) => s.closeSlashCommand);
+  const addBlock = useEditorStore((s) => s.addBlock);
+  const setSlashQuery = useEditorStore((s) => s.setSlashQuery);
+  const deleteBlock = useEditorStore((s) => s.deleteBlock);
+  const blocks = useEditorStore((s) => s.form.blocks);
 
   const [selectedIdx, setSelectedIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -61,7 +58,7 @@ export default function SlashCommandPalette() {
   function insertBlock(type: BlockType) {
     // If the trigger block is empty, replace it
     if (slashCommandBlockId) {
-      const triggerBlock = form.blocks.find((b) => b.id === slashCommandBlockId);
+      const triggerBlock = blocks.find((b) => b.id === slashCommandBlockId);
       if (triggerBlock && triggerBlock.type === "paragraph") {
         const props = triggerBlock.properties as any;
         if (!props.text) {
@@ -116,12 +113,12 @@ export default function SlashCommandPalette() {
           {results.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-6">No results for "{slashCommandQuery}"</p>
           ) : (
-            Object.entries(grouped).map(([category, blocks]) => (
+            Object.entries(grouped).map(([category, blockDefs]) => (
               <div key={category}>
                 <p className="text-[11px] font-medium text-muted-foreground px-2 py-1.5 mt-1">
                   {CATEGORY_LABELS[category] ?? category}
                 </p>
-                {blocks.map((block) => {
+                {blockDefs.map((block) => {
                   const globalIdx = flatResults.findIndex((b) => b.type === block.type);
                   const Icon = getIcon(block.icon);
                   const isSelected = globalIdx === selectedIdx;

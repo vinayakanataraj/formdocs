@@ -22,13 +22,14 @@ function findBlockById(blocks: Block[], id: string): Block | undefined {
 }
 
 export default function EditorSidebar() {
-  const { activePanel, setActivePanel, selectedBlockId, form } = useEditorStore();
+  const activePanel = useEditorStore((s) => s.activePanel);
+  const setActivePanel = useEditorStore((s) => s.setActivePanel);
+  const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
+  const blocks = useEditorStore((s) => s.form.blocks);
   const [tab, setTab] = useState<Tab>("webhook");
 
   const isOpen = activePanel !== "none";
-  const selectedBlock = selectedBlockId
-    ? findBlockById(form.blocks, selectedBlockId)
-    : null;
+  const selectedBlock = selectedBlockId ? findBlockById(blocks, selectedBlockId) : null;
 
   // Always show when a field is selected for config
   const showFieldConfig = activePanel === "field-config" && selectedBlock;

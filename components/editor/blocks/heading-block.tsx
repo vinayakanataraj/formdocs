@@ -1,14 +1,8 @@
 "use client";
 
-import type { Block } from "@/lib/types";
+import type { EditorBlockProps } from "@/lib/types";
 import { useEditorStore } from "@/lib/store/editor";
 import { useEffect, useRef } from "react";
-
-interface Props {
-  block: Block;
-  onChange: (props: any) => void;
-  readOnly?: boolean;
-}
 
 const TAG_MAP = { heading1: "h1", heading2: "h2", heading3: "h3" } as const;
 const CLASS_MAP = {
@@ -17,8 +11,8 @@ const CLASS_MAP = {
   heading3: "text-[20px] font-semibold leading-[1.3]",
 };
 
-export default function HeadingBlock({ block, onChange, readOnly }: Props) {
-  const { openSlashCommand } = useEditorStore();
+export default function HeadingBlock({ block, onChange, readOnly }: EditorBlockProps) {
+  const openSlashCommand = useEditorStore((s) => s.openSlashCommand);
   const props = block.properties as { text?: string };
   const Tag = TAG_MAP[block.type as keyof typeof TAG_MAP] ?? "h2";
   const className = CLASS_MAP[block.type as keyof typeof CLASS_MAP];

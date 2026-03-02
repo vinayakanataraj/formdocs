@@ -1,10 +1,8 @@
 "use client";
 
-import type { Block, PageBreakProps } from "@/lib/types";
+import type { PageBreakProps, EditorBlockProps } from "@/lib/types";
 
-interface Props { block: Block; onChange: (p: any) => void; readOnly?: boolean; }
-
-export default function PageBreakBlock({ block, onChange, readOnly }: Props) {
+export default function PageBreakBlock({ block, onChange, readOnly }: EditorBlockProps) {
   const p = block.properties as PageBreakProps;
 
   return (

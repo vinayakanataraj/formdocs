@@ -15,7 +15,10 @@ const FIELD_TYPES = new Set([
 ]);
 
 export default function BlockActions({ block }: BlockActionsProps) {
-  const { deleteBlock, duplicateBlock, setActivePanel, openSlashCommand } = useEditorStore();
+  const deleteBlock = useEditorStore((s) => s.deleteBlock);
+  const duplicateBlock = useEditorStore((s) => s.duplicateBlock);
+  const setActivePanel = useEditorStore((s) => s.setActivePanel);
+  const openSlashCommand = useEditorStore((s) => s.openSlashCommand);
   const isField = FIELD_TYPES.has(block.type);
 
   return (

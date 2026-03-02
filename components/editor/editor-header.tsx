@@ -12,7 +12,7 @@ interface EditorHeaderProps {
 }
 
 export default function EditorHeader({ onSave, isSaving, isDirty, saveError }: EditorHeaderProps) {
-  const { form } = useEditorStore();
+  const form = useEditorStore((s) => s.form);
 
   return (
     <header className="flex items-center justify-between px-4 py-2 border-b border-border/30 bg-background z-10">

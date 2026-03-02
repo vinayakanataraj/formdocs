@@ -1,12 +1,10 @@
 "use client";
 
-import type { Block, ColumnLayoutProps } from "@/lib/types";
+import type { ColumnLayoutProps, EditorBlockProps } from "@/lib/types";
 import BlockRenderer from "@/components/editor/block-renderer";
 import { Columns2 } from "lucide-react";
 
-interface Props { block: Block; onChange: (p: any) => void; readOnly?: boolean; }
-
-export default function ColumnLayoutBlock({ block, onChange, readOnly }: Props) {
+export default function ColumnLayoutBlock({ block, onChange, readOnly }: EditorBlockProps) {
   const p = block.properties as ColumnLayoutProps;
   const cols = p.columns ?? 2;
   const children = block.children ?? [];

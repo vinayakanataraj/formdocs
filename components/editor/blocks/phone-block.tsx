@@ -1,12 +1,11 @@
 "use client";
 
-import type { Block, PhoneProps } from "@/lib/types";
+import type { PhoneProps, EditorBlockProps } from "@/lib/types";
+import { DISABLED_ICON_INPUT_CLASS } from "@/lib/constants";
 import FieldWrapper from "./field-wrapper";
 import { Phone } from "lucide-react";
 
-interface Props { block: Block; onChange: (p: any) => void; readOnly?: boolean; }
-
-export default function PhoneField({ block, onChange, readOnly }: Props) {
+export default function PhoneField({ block, onChange, readOnly }: EditorBlockProps) {
   const p = block.properties as PhoneProps;
   return (
     <FieldWrapper label={p.label} helpText={p.helpText} required={p.required} onLabelChange={(label) => onChange({ label })} readOnly={readOnly}>
@@ -16,7 +15,7 @@ export default function PhoneField({ block, onChange, readOnly }: Props) {
           type="tel"
           disabled
           placeholder={p.placeholder || "+1 (555) 000-0000"}
-          className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-[4px] bg-muted/40 text-muted-foreground cursor-default"
+          className={DISABLED_ICON_INPUT_CLASS}
         />
       </div>
     </FieldWrapper>

@@ -1,15 +1,9 @@
 "use client";
 
-import type { Block } from "@/lib/types";
+import type { EditorBlockProps } from "@/lib/types";
 import { useEffect, useRef } from "react";
 
-interface Props {
-  block: Block;
-  onChange: (props: any) => void;
-  readOnly?: boolean;
-}
-
-export default function QuoteBlock({ block, onChange, readOnly }: Props) {
+export default function QuoteBlock({ block, onChange, readOnly }: EditorBlockProps) {
   const props = block.properties as { text?: string };
   const ref = useRef<HTMLDivElement>(null);
 

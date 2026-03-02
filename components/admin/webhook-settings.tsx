@@ -31,7 +31,8 @@ interface TestResult {
 }
 
 export default function WebhookSettings() {
-  const { form, updateWebhook } = useEditorStore();
+  const form = useEditorStore((s) => s.form);
+  const updateWebhook = useEditorStore((s) => s.updateWebhook);
   const wh = form.webhook;
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<TestResult | null>(null);

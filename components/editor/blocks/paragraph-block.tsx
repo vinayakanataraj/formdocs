@@ -1,17 +1,11 @@
 "use client";
 
-import type { Block } from "@/lib/types";
+import type { EditorBlockProps } from "@/lib/types";
 import { useEditorStore } from "@/lib/store/editor";
 import { useEffect, useRef } from "react";
 
-interface Props {
-  block: Block;
-  onChange: (props: any) => void;
-  readOnly?: boolean;
-}
-
-export default function ParagraphBlock({ block, onChange, readOnly }: Props) {
-  const { openSlashCommand } = useEditorStore();
+export default function ParagraphBlock({ block, onChange, readOnly }: EditorBlockProps) {
+  const openSlashCommand = useEditorStore((s) => s.openSlashCommand);
   const props = block.properties as { text?: string };
   const ref = useRef<HTMLDivElement>(null);
 
