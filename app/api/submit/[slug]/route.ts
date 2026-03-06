@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getForm } from "@/lib/forms";
 import { isAdminRequestValid } from "@/lib/auth";
 import { buildSubmissionSchema } from "@/lib/validation/form-schema";
-import type { WebhookPayload, WebhookHeader } from "@/lib/types";
+import { slugify, ensureBlockSlugs } from "@/lib/utils";
+import type { WebhookPayload, WebhookHeader, Block } from "@/lib/types";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -24,6 +25,38 @@ function isSafeWebhookUrl(urlString: string): boolean {
   } catch {
     return false;
   }
+}
+
+// ─── Build id→slug lookup from form blocks ────────────────────────────────────
+
+function getBlockSlug(block: Block): string {
+  return (block.properties as any).slug || slugify((block.properties as any).label ?? block.type) || block.id;
+}
+
+function buildSlugMaps(blocks: Block[]): {
+  // blocks param is pre-normalized via ensureBlockSlugs before this is called
+  fieldSlugs: Map<string, string>;
+  itemSlugs: Map<string, string>;
+  childSlugs: Map<string, Map<string, string>>;
+} {
+  const fieldSlugs = new Map<string, string>();
+  const itemSlugs = new Map<string, string>();
+  const childSlugs = new Map<string, Map<string, string>>();
+
+  for (const block of blocks) {
+    if (block.type === "itemisation") {
+      itemSlugs.set(block.id, getBlockSlug(block));
+      const childMap = new Map<string, string>();
+      for (const child of block.children ?? []) {
+        childMap.set(child.id, getBlockSlug(child));
+      }
+      childSlugs.set(block.id, childMap);
+    } else {
+      fieldSlugs.set(block.id, getBlockSlug(block));
+    }
+  }
+
+  return { fieldSlugs, itemSlugs, childSlugs };
 }
 
 // ─── Webhook header builder ───────────────────────────────────────────────────
@@ -103,6 +136,29 @@ export async function POST(req: NextRequest, { params }: Params) {
       );
     }
 
+    // Build simple slug-keyed payload (normalize first so old forms without slugs work)
+    const normalizedBlocks = ensureBlockSlugs(form.blocks);
+    const { fieldSlugs, itemSlugs, childSlugs } = buildSlugMaps(normalizedBlocks);
+    const data: Record<string, unknown> = {};
+
+    for (const [fieldId, fieldData] of Object.entries(submission.fields ?? {})) {
+      const key = fieldSlugs.get(fieldId) ?? fieldId;
+      data[key] = (fieldData as any)?.value;
+    }
+
+    for (const [blockId, rows] of Object.entries(submission.itemisations ?? {})) {
+      const key = itemSlugs.get(blockId) ?? blockId;
+      const childMap = childSlugs.get(blockId) ?? new Map<string, string>();
+      data[key] = (rows as any[]).map((row) => {
+        const rowObj: Record<string, unknown> = {};
+        for (const [childId, value] of Object.entries(row)) {
+          if (childId === "id") continue; // RHF field array internal id
+          rowObj[childMap.get(childId) ?? childId] = value;
+        }
+        return rowObj;
+      });
+    }
+
     const payload: WebhookPayload = {
       meta: {
         slug: form.meta.slug,
@@ -111,8 +167,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         userAgent: req.headers.get("user-agent") ?? undefined,
         ip: req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? undefined,
       },
-      fields: submission.fields ?? {},
-      itemisations: submission.itemisations ?? {},
+      data,
     };
 
     const headers = buildHeaders(form.webhook.headers);
@@ -165,6 +220,26 @@ export async function PUT(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Webhook URL targets a disallowed address" }, { status: 400 });
   }
 
+  const normalizedBlocks = ensureBlockSlugs(form.blocks);
+  const { fieldSlugs, itemSlugs, childSlugs } = buildSlugMaps(normalizedBlocks);
+  const sampleData: Record<string, unknown> = {};
+
+  for (const block of normalizedBlocks) {
+    if (block.type === "itemisation") {
+      const key = itemSlugs.get(block.id) ?? block.id;
+      const childMap = childSlugs.get(block.id) ?? new Map<string, string>();
+      const sampleRow: Record<string, unknown> = {};
+      for (const child of block.children ?? []) {
+        sampleRow[childMap.get(child.id) ?? child.id] = `[sample ${child.type}]`;
+      }
+      sampleData[key] = sampleRow ? [sampleRow] : [];
+    } else if (["short_text","long_text","email","phone","number","currency","date",
+      "single_select","multi_select","rating","yes_no","file_upload"].includes(block.type)) {
+      const key = fieldSlugs.get(block.id) ?? block.id;
+      sampleData[key] = `[sample ${block.type}]`;
+    }
+  }
+
   const samplePayload: WebhookPayload = {
     meta: {
       slug: form.meta.slug,
@@ -172,18 +247,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
       submittedAt: new Date().toISOString(),
       userAgent: "Formdocs-Test/1.0",
     },
-    fields: Object.fromEntries(
-      form.blocks
-        .filter((b) =>
-          ["short_text", "long_text", "email", "phone", "number", "currency", "date",
-            "single_select", "multi_select", "rating", "yes_no"].includes(b.type)
-        )
-        .map((b) => {
-          const props = b.properties as any;
-          return [b.id, { label: props.label ?? b.type, value: `[sample ${b.type}]` }];
-        })
-    ),
-    itemisations: {},
+    data: sampleData,
   };
 
   const headers = buildHeaders(form.webhook.headers);

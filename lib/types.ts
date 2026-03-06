@@ -45,6 +45,7 @@ export interface VisibilityRule {
 
 export interface BaseBlockProps {
   label?: string;
+  slug?: string;
   placeholder?: string;
   required?: boolean;
   helpText?: string;
@@ -172,6 +173,8 @@ export interface SummaryField {
 }
 
 export interface ItemisationProps {
+  label?: string;
+  slug?: string;
   addButtonLabel?: string;
   rowLabelTemplate?: string;
   minRows?: number;
@@ -258,15 +261,6 @@ export interface Form {
 
 // ─── Webhook Payload (sent on submission) ─────────────────────────────────────
 
-export interface WebhookFieldValue {
-  label: string;
-  value: unknown;
-}
-
-export interface WebhookItemisationRow {
-  [fieldId: string]: WebhookFieldValue;
-}
-
 export interface WebhookPayload {
   meta: {
     slug: string;
@@ -275,8 +269,7 @@ export interface WebhookPayload {
     userAgent?: string;
     ip?: string;
   };
-  fields: { [fieldId: string]: WebhookFieldValue };
-  itemisations: { [blockId: string]: WebhookItemisationRow[] };
+  data: Record<string, unknown>;
 }
 
 // ─── Editor Block Props ────────────────────────────────────────────────────────

@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import type { Block, BlockType, Form, FormMeta, WebhookConfig } from "@/lib/types";
 import { createBlock } from "@/lib/blocks/defaults";
 import { createDefaultForm } from "@/lib/form-defaults";
+import { ensureBlockSlugs } from "@/lib/utils";
 
 // ─── Store Interface ───────────────────────────────────────────────────────────
 
@@ -89,7 +90,10 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   slashCommandQuery: "",
   slashCommandBlockId: null,
 
-  initForm: (form) => set({ form, isDirty: false }),
+  initForm: (form) => set({
+    form: { ...form, blocks: ensureBlockSlugs(form.blocks) },
+    isDirty: false,
+  }),
 
   updateMeta: (meta) =>
     set((s) => ({

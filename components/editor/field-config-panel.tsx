@@ -2,6 +2,7 @@
 
 import type { Block } from "@/lib/types";
 import { useEditorStore } from "@/lib/store/editor";
+import { slugify } from "@/lib/utils";
 import { Plus, Trash2 } from "lucide-react";
 
 interface Props { block: Block; }
@@ -50,7 +51,7 @@ export default function FieldConfigPanel({ block }: Props) {
   }
 
   const isField = ["short_text", "long_text", "email", "phone", "number", "currency",
-    "date", "single_select", "multi_select", "file_upload", "rating", "yes_no"].includes(block.type);
+    "date", "single_select", "multi_select", "file_upload", "rating", "yes_no", "itemisation"].includes(block.type);
 
   if (!isField) return <p className="text-xs text-muted-foreground">No configuration for this block type.</p>;
 
@@ -69,24 +70,52 @@ export default function FieldConfigPanel({ block }: Props) {
     update({ options: (p.options ?? []).filter((_: any, idx: number) => idx !== i) });
   }
 
+  function handleLabelChange(newLabel: string) {
+    const currentSlug = p.slug ?? "";
+    const derivedFromCurrent = slugify(p.label ?? "");
+    // Only auto-update slug if it hasn't been manually customized
+    if (currentSlug === "" || currentSlug === derivedFromCurrent) {
+      update({ label: newLabel, slug: slugify(newLabel) });
+    } else {
+      update({ label: newLabel });
+    }
+  }
+
   return (
     <div className="space-y-4 text-sm">
       {/* Common fields */}
       <Row label="Label">
-        <TextInput value={p.label} onChange={(v) => update({ label: v })} placeholder="Field label" />
+        <TextInput value={p.label} onChange={handleLabelChange} placeholder="Field label" />
       </Row>
 
-      {block.type !== "divider" && block.type !== "yes_no" && block.type !== "rating" && (
+      <Row label="Field Slug">
+        <TextInput
+          value={p.slug ?? slugify(p.label ?? "")}
+          onChange={(v) => {
+            const cleaned = v.toLowerCase().replace(/[^a-z0-9_]/g, "_").replace(/^_+|_+$/g, "");
+            // Don't allow clearing to empty
+            if (cleaned) update({ slug: cleaned });
+          }}
+          placeholder="field_slug"
+        />
+        <p className="text-[10px] text-muted-foreground mt-0.5">Used as the key in webhook JSON output.</p>
+      </Row>
+
+      {block.type !== "divider" && block.type !== "yes_no" && block.type !== "rating" && block.type !== "itemisation" && (
         <Row label="Placeholder">
           <TextInput value={p.placeholder} onChange={(v) => update({ placeholder: v })} placeholder="Placeholder text" />
         </Row>
       )}
 
-      <Toggle value={p.required} onChange={(v) => update({ required: v })} label="Required" />
+      {block.type !== "itemisation" && (
+        <>
+          <Toggle value={p.required} onChange={(v) => update({ required: v })} label="Required" />
 
-      <Row label="Help Text">
-        <TextInput value={p.helpText} onChange={(v) => update({ helpText: v })} placeholder="Optional help text" />
-      </Row>
+          <Row label="Help Text">
+            <TextInput value={p.helpText} onChange={(v) => update({ helpText: v })} placeholder="Optional help text" />
+          </Row>
+        </>
+      )}
 
       {/* Type-specific */}
       {(block.type === "short_text" || block.type === "long_text") && (
