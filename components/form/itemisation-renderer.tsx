@@ -1,7 +1,7 @@
 "use client";
 
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
-import type { Block, ItemisationProps, ComputedField, SummaryField } from "@/lib/types";
+import type { Block, ItemisationProps } from "@/lib/types";
 import FormBlockRenderer from "@/components/form/form-block-renderer";
 import { Plus, Trash2 } from "lucide-react";
 import { useMemo } from "react";
@@ -9,7 +9,7 @@ import { evaluateExpression, buildRowValueMap, computeSummary } from "@/lib/item
 
 interface Props {
   block: Block;
-  allValues: Record<string, any>;
+  allValues: Record<string, unknown>;
 }
 
 export default function ItemisationRenderer({ block, allValues }: Props) {
@@ -18,13 +18,14 @@ export default function ItemisationRenderer({ block, allValues }: Props) {
   const minRows = p.minRows ?? 1;
   const maxRows = p.maxRows ?? 50;
 
-  const { control, register, formState: { errors } } = useFormContext();
+  const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
     name: block.id,
   });
 
-  const rowsValues = useWatch({ control, name: block.id }) ?? [];
+  const rawRowsValues = useWatch({ control, name: block.id });
+  const rowsValues = useMemo(() => (rawRowsValues ?? []) as Record<string, unknown>[], [rawRowsValues]);
 
   function addRow() {
     if (fields.length >= maxRows) return;
@@ -45,7 +46,7 @@ export default function ItemisationRenderer({ block, allValues }: Props) {
     return result;
   }, [rowsValues, p.summaryFields]);
 
-  const label = (block.properties as any).label;
+  const label = (block.properties as ItemisationProps).label;
 
   return (
     <div className="space-y-3">
@@ -60,7 +61,7 @@ export default function ItemisationRenderer({ block, allValues }: Props) {
             : `Item ${rowIdx + 1}`;
 
           // Build value map for computed fields
-          const valueMap = buildRowValueMap(rowData, templateFields.map(f => ({ id: f.id, properties: f.properties })));
+          const valueMap = buildRowValueMap(rowData, templateFields.map(f => ({ id: f.id, properties: f.properties as { label?: string } })));
 
           return (
             <div key={field.id} className="border border-border rounded-lg overflow-hidden">

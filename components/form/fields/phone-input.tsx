@@ -1,14 +1,14 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import type { Block } from "@/lib/types";
+import type { Block, PhoneProps } from "@/lib/types";
 import FieldWrapper from "./field-wrapper";
 import { Phone } from "lucide-react";
 
 export default function PhoneInput({ block }: { block: Block }) {
-  const p = block.properties as any;
+  const p = block.properties as PhoneProps;
   const { register, formState: { errors } } = useFormContext();
-  const error = (errors[block.id] as any)?.message;
+  const error = (errors[block.id] as { message?: string } | undefined)?.message;
 
   return (
     <FieldWrapper label={p.label} helpText={p.helpText} required={p.required} error={error}>

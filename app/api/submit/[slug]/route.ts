@@ -30,7 +30,8 @@ function isSafeWebhookUrl(urlString: string): boolean {
 // ─── Build id→slug lookup from form blocks ────────────────────────────────────
 
 function getBlockSlug(block: Block): string {
-  return (block.properties as any).slug || slugify((block.properties as any).label ?? block.type) || block.id;
+  const p = block.properties as Record<string, unknown>;
+  return (p.slug as string | undefined) || slugify((p.label as string | undefined) ?? block.type) || block.id;
 }
 
 function buildSlugMaps(blocks: Block[]): {
@@ -122,7 +123,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     // Client sends { fields: { id: { label, value } }, itemisations: { id: rows[] } }
     const flatData: Record<string, unknown> = {};
     for (const [id, fieldData] of Object.entries(submission.fields ?? {})) {
-      flatData[id] = (fieldData as any)?.value;
+      flatData[id] = (fieldData as { value?: unknown })?.value;
     }
     for (const [id, rows] of Object.entries(submission.itemisations ?? {})) {
       flatData[id] = rows;
@@ -143,13 +144,13 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     for (const [fieldId, fieldData] of Object.entries(submission.fields ?? {})) {
       const key = fieldSlugs.get(fieldId) ?? fieldId;
-      data[key] = (fieldData as any)?.value;
+      data[key] = (fieldData as { value?: unknown } | undefined)?.value;
     }
 
     for (const [blockId, rows] of Object.entries(submission.itemisations ?? {})) {
       const key = itemSlugs.get(blockId) ?? blockId;
       const childMap = childSlugs.get(blockId) ?? new Map<string, string>();
-      data[key] = (rows as any[]).map((row) => {
+      data[key] = (rows as Record<string, unknown>[]).map((row) => {
         const rowObj: Record<string, unknown> = {};
         for (const [childId, value] of Object.entries(row)) {
           if (childId === "id") continue; // RHF field array internal id

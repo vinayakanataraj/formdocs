@@ -5,7 +5,7 @@ import type { Block } from "@/lib/types";
  * Build a dynamic Zod schema for a form submission based on the form's blocks.
  * Each field block contributes a key to the schema.
  */
-export function buildSubmissionSchema(blocks: Block[]): z.ZodObject<any> {
+export function buildSubmissionSchema(blocks: Block[]): z.ZodObject<Record<string, z.ZodTypeAny>> {
   const shape: Record<string, z.ZodTypeAny> = {};
 
   for (const block of blocks) {
@@ -16,6 +16,7 @@ export function buildSubmissionSchema(blocks: Block[]): z.ZodObject<any> {
 }
 
 function addBlockToSchema(shape: Record<string, z.ZodTypeAny>, block: Block) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const p = block.properties as any;
 
   switch (block.type) {

@@ -22,7 +22,7 @@ export default function ItemisationBlock({ block, onChange, readOnly }: EditorBl
         <Table className="w-4 h-4 text-muted-foreground" />
         <input
           type="text"
-          value={typeof (block.properties as any).label === "string" ? (block.properties as any).label : ""}
+          value={(block.properties as ItemisationProps).label ?? ""}
           onChange={(e) => onChange({ label: e.target.value })}
           placeholder="Itemisation label"
           className="text-sm font-medium bg-transparent outline-none flex-1 placeholder:text-muted-foreground/60"

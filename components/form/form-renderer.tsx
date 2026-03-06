@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import type { Block, Form } from "@/lib/types";
+import type { Block, BaseBlockProps, Form } from "@/lib/types";
 import { buildSubmissionSchema } from "@/lib/validation/form-schema";
 import FormBlockRenderer from "@/components/form/form-block-renderer";
 import ProgressBar from "@/components/form/progress-bar";
@@ -34,7 +34,7 @@ const LAYOUT_TYPES = new Set(["heading1","heading2","heading3","paragraph","bull
 function getRequiredFieldIds(blocks: Block[]): string[] {
   const ids: string[] = [];
   for (const b of blocks) {
-    if ((b.properties as any)?.required) ids.push(b.id);
+    if ((b.properties as BaseBlockProps).required) ids.push(b.id);
     if (b.children) ids.push(...getRequiredFieldIds(b.children));
   }
   return ids;
@@ -69,7 +69,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
     defaultValues: {},
   });
 
-  const { watch, handleSubmit, trigger, formState } = methods;
+  const { watch, handleSubmit, trigger } = methods;
   const values = watch();
 
   // Restore autosave on mount
@@ -91,7 +91,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
   const progress = useMemo(() => {
     if (requiredIds.length === 0) return 100;
     const filled = requiredIds.filter((id) => {
-      const v = (values as any)[id];
+      const v = (values as Record<string, unknown>)[id];
       if (v === undefined || v === null || v === "") return false;
       if (Array.isArray(v)) return v.length > 0;
       return true;
@@ -105,23 +105,25 @@ export default function FormRenderer({ form }: FormRendererProps) {
   async function handleNext() {
     // Validate ALL fields on the current page (required and non-required)
     const currentPageFieldIds = getAllFieldIds(pages[currentPage]);
-    const valid = await trigger(currentPageFieldIds as any);
+    const valid = await trigger(currentPageFieldIds as Parameters<typeof trigger>[0]);
     if (valid) setCurrentPage((p) => p + 1);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function onSubmit(data: any) {
     setSubmitting(true);
     setSubmitError(null);
 
     try {
       // Build webhook payload
-      const fields: Record<string, any> = {};
-      const itemisations: Record<string, any> = {};
+      const fields: Record<string, { label: string; value: unknown }> = {};
+      const itemisations: Record<string, unknown[]> = {};
 
       for (const block of form.blocks) {
         if (block.type === "itemisation") {
           itemisations[block.id] = data[block.id] ?? [];
         } else if (data[block.id] !== undefined) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const props = block.properties as any;
           fields[block.id] = { label: props.label ?? block.type, value: data[block.id] };
         }

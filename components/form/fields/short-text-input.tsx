@@ -7,7 +7,7 @@ import FieldWrapper from "./field-wrapper";
 export default function ShortTextInput({ block }: { block: Block }) {
   const p = block.properties as ShortTextProps;
   const { register, formState: { errors } } = useFormContext();
-  const error = (errors[block.id] as any)?.message;
+  const error = (errors[block.id] as { message?: string } | undefined)?.message;
 
   return (
     <FieldWrapper label={p.label} helpText={p.helpText} required={p.required} error={error}>

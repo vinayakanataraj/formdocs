@@ -13,10 +13,11 @@ const CATEGORY_LABELS: Record<string, string> = {
   special: "Special",
 };
 
-function getIcon(name: string) {
-  const Icon = (Icons as any)[name];
-  if (!Icon) return Icons.Square;
-  return Icon;
+type LucideIcon = React.ComponentType<{ className?: string }>;
+
+function getIcon(name: string): LucideIcon {
+  const icon = (Icons as unknown as Record<string, LucideIcon | undefined>)[name];
+  return icon ?? Icons.Square;
 }
 
 export default function SlashCommandPalette() {
@@ -46,12 +47,14 @@ export default function SlashCommandPalette() {
 
   useEffect(() => {
     if (slashCommandOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedIdx(0);
       setTimeout(() => inputRef.current?.focus(), 10);
     }
   }, [slashCommandOpen]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedIdx(0);
   }, [slashCommandQuery]);
 
@@ -60,7 +63,7 @@ export default function SlashCommandPalette() {
     if (slashCommandBlockId) {
       const triggerBlock = blocks.find((b) => b.id === slashCommandBlockId);
       if (triggerBlock && triggerBlock.type === "paragraph") {
-        const props = triggerBlock.properties as any;
+        const props = triggerBlock.properties as { text?: string };
         if (!props.text) {
           // Replace the empty paragraph block
           deleteBlock(slashCommandBlockId);
@@ -111,7 +114,7 @@ export default function SlashCommandPalette() {
 
         <div ref={listRef} className="max-h-[320px] overflow-y-auto p-1">
           {results.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-6">No results for "{slashCommandQuery}"</p>
+            <p className="text-xs text-muted-foreground text-center py-6">No results for &quot;{slashCommandQuery}&quot;</p>
           ) : (
             Object.entries(grouped).map(([category, blockDefs]) => (
               <div key={category}>

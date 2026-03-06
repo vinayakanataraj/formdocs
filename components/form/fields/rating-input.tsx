@@ -11,7 +11,7 @@ const ICONS = { stars: Star, hearts: Heart, thumbs: ThumbsUp };
 export default function RatingInput({ block }: { block: Block }) {
   const p = block.properties as RatingProps;
   const { control, formState: { errors } } = useFormContext();
-  const error = (errors[block.id] as any)?.message;
+  const error = (errors[block.id] as { message?: string } | undefined)?.message;
   const max = p.maxStars ?? 5;
   const Icon = ICONS[p.iconStyle ?? "stars"];
   const [hovered, setHovered] = useState<number | null>(null);

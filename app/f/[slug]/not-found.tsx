@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export default function FormNotFound() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">

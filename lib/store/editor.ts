@@ -80,7 +80,7 @@ function insertAfter(blocks: Block[], afterId: string | null | undefined, newBlo
 
 // ─── Store ─────────────────────────────────────────────────────────────────────
 
-export const useEditorStore = create<EditorStore>((set, get) => ({
+export const useEditorStore = create<EditorStore>((set) => ({
   form: createDefaultForm(""),
   selectedBlockId: null,
   activePanel: "none",

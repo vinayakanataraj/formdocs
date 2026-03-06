@@ -103,7 +103,7 @@ export default function WebhookSettings() {
         <label className="text-xs font-medium">HTTP Method</label>
         <select
           value={wh.method}
-          onChange={(e) => updateWebhook({ method: e.target.value as any })}
+          onChange={(e) => updateWebhook({ method: e.target.value as "POST" | "PUT" | "PATCH" })}
           className="w-full px-3 py-2 text-xs border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-ring"
         >
           <option value="POST">POST</option>

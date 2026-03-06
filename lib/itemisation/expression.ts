@@ -33,7 +33,7 @@ export function evaluateExpression(
  */
 export function buildRowValueMap(
   rowData: Record<string, unknown>,
-  templateFields: { id: string; properties: any }[]
+  templateFields: { id: string; properties: { label?: string } }[]
 ): Record<string, number> {
   const map: Record<string, number> = {};
   for (const field of templateFields) {

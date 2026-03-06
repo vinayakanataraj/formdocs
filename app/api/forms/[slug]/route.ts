@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getForm, saveForm, deleteForm, formExists } from "@/lib/forms";
 import { isAdminRequestValid as isAdminRequest } from "@/lib/auth";
 import { formSchema } from "@/lib/blocks/schemas";
+import type { Form } from "@/lib/types";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -35,7 +36,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     }
 
     form.meta.updatedAt = new Date().toISOString();
-    await saveForm(form as any);
+    await saveForm(form as unknown as Form);
     return NextResponse.json({ form });
   } catch (err) {
     console.error("PUT /api/forms/[slug] error:", err);

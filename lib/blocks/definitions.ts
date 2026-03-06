@@ -1,4 +1,4 @@
-import type { BlockType, ContentBlockType, FieldBlockType, LayoutBlockType } from "@/lib/types";
+import type { BlockType } from "@/lib/types";
 
 export type BlockCategory = "content" | "fields" | "layout" | "special";
 

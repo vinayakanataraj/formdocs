@@ -131,6 +131,7 @@ export const itemisationPropsSchema = z.object({
 
 // ─── Block Schema ──────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const blockSchema: z.ZodType<any> = z.lazy(() =>
   z.object({
     id: z.string(),

@@ -1,6 +1,5 @@
 import { nanoid } from "nanoid";
 import type { Block, BlockType } from "@/lib/types";
-import { slugify } from "@/lib/utils";
 
 export function createBlock(type: BlockType, overrides: Partial<Block> = {}): Block {
   const id = nanoid();

@@ -44,6 +44,7 @@ function Toggle({ value, onChange, label }: { value?: boolean; onChange: (v: boo
 
 export default function FieldConfigPanel({ block }: Props) {
   const updateBlock = useEditorStore((s) => s.updateBlock);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const p = block.properties as any;
 
   function update(partial: Record<string, unknown>) {
@@ -56,18 +57,18 @@ export default function FieldConfigPanel({ block }: Props) {
   if (!isField) return <p className="text-xs text-muted-foreground">No configuration for this block type.</p>;
 
   function addOption() {
-    const opts = p.options ?? [];
+    const opts = (p.options as string[] | undefined) ?? [];
     update({ options: [...opts, `Option ${opts.length + 1}`] });
   }
 
   function updateOption(i: number, val: string) {
-    const opts = [...(p.options ?? [])];
+    const opts = [...((p.options as string[] | undefined) ?? [])];
     opts[i] = val;
     update({ options: opts });
   }
 
   function removeOption(i: number) {
-    update({ options: (p.options ?? []).filter((_: any, idx: number) => idx !== i) });
+    update({ options: ((p.options as string[] | undefined) ?? []).filter((_: unknown, idx: number) => idx !== i) });
   }
 
   function handleLabelChange(newLabel: string) {

@@ -24,7 +24,6 @@ import { Plus } from "lucide-react";
 export default function BlockList() {
   const form = useEditorStore((s) => s.form);
   const moveBlock = useEditorStore((s) => s.moveBlock);
-  const addBlock = useEditorStore((s) => s.addBlock);
   const openSlashCommand = useEditorStore((s) => s.openSlashCommand);
   const [activeBlock, setActiveBlock] = useState<Block | null>(null);
 

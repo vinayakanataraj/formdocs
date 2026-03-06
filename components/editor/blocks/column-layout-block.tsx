@@ -4,7 +4,7 @@ import type { ColumnLayoutProps, EditorBlockProps } from "@/lib/types";
 import BlockRenderer from "@/components/editor/block-renderer";
 import { Columns2 } from "lucide-react";
 
-export default function ColumnLayoutBlock({ block, onChange, readOnly }: EditorBlockProps) {
+export default function ColumnLayoutBlock({ block, readOnly }: EditorBlockProps) {
   const p = block.properties as ColumnLayoutProps;
   const cols = p.columns ?? 2;
   const children = block.children ?? [];

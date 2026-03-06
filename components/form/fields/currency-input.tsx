@@ -7,7 +7,7 @@ import FieldWrapper from "./field-wrapper";
 export default function CurrencyInput({ block }: { block: Block }) {
   const p = block.properties as CurrencyProps;
   const { register, formState: { errors } } = useFormContext();
-  const error = (errors[block.id] as any)?.message;
+  const error = (errors[block.id] as { message?: string } | undefined)?.message;
   const symbol = p.currencySymbol ?? "$";
 
   return (

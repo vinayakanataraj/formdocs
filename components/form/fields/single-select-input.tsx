@@ -7,7 +7,7 @@ import FieldWrapper from "./field-wrapper";
 export default function SingleSelectInput({ block }: { block: Block }) {
   const p = block.properties as SingleSelectProps;
   const { register, formState: { errors } } = useFormContext();
-  const error = (errors[block.id] as any)?.message;
+  const error = (errors[block.id] as { message?: string } | undefined)?.message;
   const options = p.options ?? [];
 
   if (p.display === "radio" || options.length <= 8) {

@@ -9,7 +9,7 @@ import { useState, useRef } from "react";
 export default function FileUploadInput({ block }: { block: Block }) {
   const p = block.properties as FileUploadProps;
   const { control, formState: { errors } } = useFormContext();
-  const error = (errors[block.id] as any)?.message;
+  const error = (errors[block.id] as { message?: string } | undefined)?.message;
   const [files, setFiles] = useState<{ name: string; size: number; base64: string }[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 

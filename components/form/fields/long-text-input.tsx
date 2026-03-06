@@ -3,12 +3,11 @@
 import { useFormContext } from "react-hook-form";
 import type { Block, LongTextProps } from "@/lib/types";
 import FieldWrapper from "./field-wrapper";
-import { useState } from "react";
 
 export default function LongTextInput({ block }: { block: Block }) {
   const p = block.properties as LongTextProps;
   const { register, formState: { errors }, watch } = useFormContext();
-  const error = (errors[block.id] as any)?.message;
+  const error = (errors[block.id] as { message?: string } | undefined)?.message;
   const value = watch(block.id) ?? "";
 
   return (

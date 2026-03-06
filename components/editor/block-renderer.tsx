@@ -104,7 +104,7 @@ export default function BlockRenderer({ block, readOnly = false }: BlockRenderer
     default:
       return (
         <div className="p-3 border border-dashed border-border rounded text-sm text-muted-foreground">
-          Unknown block type: {(block as any).type}
+          Unknown block type: {(block as unknown as { type: string }).type}
         </div>
       );
   }

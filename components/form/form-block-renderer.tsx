@@ -1,7 +1,6 @@
 "use client";
 
-import type { Block } from "@/lib/types";
-import { useFormContext, useWatch } from "react-hook-form";
+import type { Block, BaseBlockProps } from "@/lib/types";
 
 // Respondent field components
 import ShortTextInput from "@/components/form/fields/short-text-input";
@@ -20,12 +19,12 @@ import ItemisationRenderer from "@/components/form/itemisation-renderer";
 
 interface Props {
   block: Block;
-  allValues: Record<string, any>;
+  allValues: Record<string, unknown>;
 }
 
 // Evaluate a visibility rule
-function isVisible(block: Block, values: Record<string, any>): boolean {
-  const rule = (block.properties as any)?.visibilityRule;
+function isVisible(block: Block, values: Record<string, unknown>): boolean {
+  const rule = (block.properties as BaseBlockProps)?.visibilityRule;
   if (!rule) return true;
 
   const refValue = values[rule.fieldId];
@@ -42,6 +41,7 @@ function isVisible(block: Block, values: Record<string, any>): boolean {
 export default function FormBlockRenderer({ block, allValues }: Props) {
   if (!isVisible(block, allValues)) return null;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const p = block.properties as any;
 
   switch (block.type) {

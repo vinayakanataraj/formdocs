@@ -22,7 +22,7 @@ const FIELD_BLOCK_TYPES = new Set([
 ]);
 
 /** Ensure every field/itemisation block (and its children) has a non-empty slug. */
-export function ensureBlockSlugs<T extends { id: string; type: string; properties: any; children?: T[] }>(
+export function ensureBlockSlugs<T extends { id: string; type: string; properties: object; children?: T[] }>(
   blocks: T[],
   usedSlugs = new Set<string>()
 ): T[] {
@@ -35,20 +35,21 @@ export function ensureBlockSlugs<T extends { id: string; type: string; propertie
       return children !== block.children ? { ...block, children } : block;
     }
 
-    const p = block.properties;
-    if (p.slug && p.slug.trim() !== "") {
-      usedSlugs.add(p.slug);
+    const p = block.properties as Record<string, unknown>;
+    const existingSlug = p.slug as string | undefined;
+    if (existingSlug && existingSlug.trim() !== "") {
+      usedSlugs.add(existingSlug);
       return children !== block.children ? { ...block, children } : block;
     }
 
     // Derive slug from label, de-duplicate with a numeric suffix if needed
-    let base = slugify(p.label ?? block.type) || block.type;
+    const base = slugify((p.label as string | undefined) ?? block.type) || block.type;
     let candidate = base;
     let n = 1;
     while (usedSlugs.has(candidate)) {
       candidate = `${base}_${n++}`;
     }
     usedSlugs.add(candidate);
-    return { ...block, properties: { ...p, slug: candidate }, children };
+    return { ...block, properties: { ...p, slug: candidate } as T["properties"], children };
   });
 }

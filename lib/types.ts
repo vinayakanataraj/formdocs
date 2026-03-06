@@ -64,7 +64,7 @@ export interface LongTextProps extends BaseBlockProps {
   showCharCounter?: boolean;
 }
 
-export interface EmailProps extends BaseBlockProps {}
+export type EmailProps = BaseBlockProps;
 
 export interface PhoneProps extends BaseBlockProps {
   countryCode?: boolean;
@@ -139,6 +139,7 @@ export interface CalloutProps {
   backgroundColor?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DividerProps {}
 
 export interface ColumnLayoutProps {
@@ -276,7 +277,7 @@ export interface WebhookPayload {
 
 export interface EditorBlockProps {
   block: Block;
-  onChange: (props: any) => void;
+  onChange: (props: Partial<Block["properties"]>) => void;
   readOnly?: boolean;
 }
 
