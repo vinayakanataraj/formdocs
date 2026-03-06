@@ -27,7 +27,7 @@ A Notion-style, self-hostable, open-source form builder. Create and publish form
 | Expressions | expr-eval (sandboxed computed fields) |
 | Icons | lucide-react |
 | IDs | nanoid |
-| Storage | Filesystem JSON (no database) |
+| Storage | Filesystem JSON (local) or Vercel Blob (production) |
 
 ## Getting Started
 
@@ -52,14 +52,17 @@ Create a `.env.local` file:
 # Required — the password used to log in to the admin panel
 ADMIN_SECRET=your-strong-secret-here
 
-# Required — used to sign JWT session cookies (min 32 characters)
-JWT_SECRET=a-long-random-string-at-least-32-chars
-
 # Optional — path where form JSON files are stored (default: ./data/forms)
 # DATA_DIR=/var/formdocs/data
+
+# Optional — Vercel Blob storage (recommended for Vercel deployments; omit to use filesystem)
+# BLOB_READ_WRITE_TOKEN=vercel_blob_xxxxxxxxxxxxxxxxxxxx
+
+# Optional — base URL for generating shareable form links
+# NEXT_PUBLIC_BASE_URL=https://your-app.vercel.app
 ```
 
-> **Note:** `ADMIN_SECRET` and `JWT_SECRET` are both required. The app will return a 500 error on auth routes if they are missing.
+> **Note:** `ADMIN_SECRET` is required. The app signs JWTs using `ADMIN_SECRET` directly via HMAC — no separate `JWT_SECRET` is needed.
 
 ### 3. Run locally
 
@@ -77,6 +80,32 @@ Public forms are served at `/f/<slug>`.
 npm run build
 npm run start
 ```
+
+## Deploying to Vercel
+
+1. **Import the repo** — go to [vercel.com/new](https://vercel.com/new), select your fork, and keep the default Next.js settings.
+2. **Create a Blob store** — in the Vercel dashboard, go to **Storage → Create Database → Blob**. Name it (e.g. `formdocs-storage`) and click **Connect to Project** — this auto-injects `BLOB_READ_WRITE_TOKEN`.
+3. **Set environment variables** in Project Settings → Environment Variables:
+
+   | Variable | Value |
+   |---|---|
+   | `ADMIN_SECRET` | A strong password (min 16 chars) |
+   | `BLOB_READ_WRITE_TOKEN` | Auto-set if you connected the Blob store |
+   | `NEXT_PUBLIC_BASE_URL` | Your deployment URL, e.g. `https://yourapp.vercel.app` |
+
+4. **Deploy** — click Deploy (or push to `main` for automatic deploys).
+5. **Verify** — visit `/admin/login`, log in, create and save a form. Check the Blob store dashboard to confirm a `forms/<slug>.json` file was created.
+
+### Local development with Blob
+
+```bash
+npm i -g vercel
+vercel link          # link to your Vercel project
+vercel env pull      # writes BLOB_READ_WRITE_TOKEN into .env.local
+npm run dev          # now uses the same Blob store as production
+```
+
+Omit `BLOB_READ_WRITE_TOKEN` from `.env.local` to fall back to local filesystem storage.
 
 ## Project Structure
 
@@ -126,15 +155,22 @@ formdocs/
 
 ### Storage
 
-Forms are stored as individual JSON files under `data/forms/<slug>.json`. There is no database. The `DATA_DIR` environment variable lets you point to a different directory (useful when the working directory is read-only, e.g. on some PaaS platforms).
+Formdocs supports two storage backends, selected automatically by the presence of `BLOB_READ_WRITE_TOKEN`:
 
-Writes are atomic: the file is written to `<slug>.json.tmp` then renamed over the destination, so a crash mid-write cannot corrupt an existing form.
+| Backend | When active | Form location |
+|---|---|---|
+| Filesystem (`lib/forms-fs.ts`) | `BLOB_READ_WRITE_TOKEN` not set (default) | `data/forms/<slug>.json` |
+| Vercel Blob (`lib/forms-blob.ts`) | `BLOB_READ_WRITE_TOKEN` is set | `forms/<slug>.json` in your Blob store |
 
-Slugs are validated against `/^[a-z0-9-]+$/` before any filesystem operation to prevent path traversal.
+Both backends expose the same API (`listForms`, `getForm`, `saveForm`, `deleteForm`, `formExists`). The router in `lib/forms.ts` selects the backend at startup.
+
+For filesystem storage, writes are atomic: the file is written to `<slug>.json.tmp` then renamed over the destination, so a crash mid-write cannot corrupt an existing form. The `DATA_DIR` environment variable lets you point to a different directory.
+
+Slugs are validated against `/^[a-z0-9-]+$/` before any storage operation to prevent path traversal.
 
 ### Authentication
 
-Authentication uses a single shared secret (`ADMIN_SECRET`). On successful login, a JWT signed with `JWT_SECRET` (HS256) is set as an httpOnly, SameSite=Strict session cookie. The cookie is verified on every admin API call via `isAdminRequestValid(req)` — this function is async and **must always be awaited**.
+Authentication uses a single shared secret (`ADMIN_SECRET`). On successful login, a JWT signed with `ADMIN_SECRET` (HS256) is set as an httpOnly, SameSite=Strict session cookie. The cookie is verified on every admin API call via `isAdminRequestValid(req)` — this function is async and **must always be awaited**.
 
 Route protection is split into two layers:
 
@@ -244,9 +280,12 @@ Adding a new block type involves four files:
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `ADMIN_SECRET` | Yes | — | Password for the admin panel login |
-| `JWT_SECRET` | Yes | — | Secret for signing session JWTs (min 32 chars) |
-| `DATA_DIR` | No | `./data/forms` | Directory where form JSON files are stored |
+| `ADMIN_SECRET` | Yes | — | Password for the admin panel login; also used to sign session JWTs |
+| `BLOB_READ_WRITE_TOKEN` | No* | — | Vercel Blob read-write token. When set, forms are stored in Blob instead of the filesystem. Auto-injected by Vercel when you connect a Blob store to your project |
+| `DATA_DIR` | No | `./data/forms` | Directory for filesystem form storage (ignored when `BLOB_READ_WRITE_TOKEN` is set) |
+| `NEXT_PUBLIC_BASE_URL` | No | — | Base URL used to generate shareable form links (e.g. `https://yourapp.vercel.app`) |
+
+\* Required when deploying to Vercel or any environment where the filesystem is read-only.
 
 ## Security Notes
 

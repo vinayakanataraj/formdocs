@@ -84,7 +84,7 @@ async function sendWithRetry(
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
-      const res = await fetch(url, { ...options, signal: controller.signal });
+      const res = await fetch(url, { ...options, signal: controller.signal, cache: "no-store" });
       clearTimeout(timer);
       return res;
     } catch (err) {
@@ -190,7 +190,8 @@ export async function POST(req: NextRequest, { params }: Params) {
     );
 
     if (!response.ok) {
-      console.error(`Webhook returned ${response.status} for form ${slug}`);
+      const body = await response.text().catch(() => "(unreadable)");
+      console.error(`Webhook returned ${response.status} for form ${slug}: ${body}`);
       return NextResponse.json(
         { error: "Webhook returned an error", status: response.status },
         { status: 502 }
@@ -262,6 +263,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
       headers,
       body: JSON.stringify(samplePayload),
       signal: controller.signal,
+      cache: "no-store",
     });
     clearTimeout(timer);
 
