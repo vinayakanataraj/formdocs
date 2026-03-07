@@ -10,7 +10,7 @@ export default function CalloutBlock({ block, onChange, readOnly }: EditorBlockP
 
   useEffect(() => {
     if (ref.current && document.activeElement !== ref.current) {
-      ref.current.innerHTML = props.text ?? "";
+      ref.current.textContent = props.text ?? "";
     }
   }, [props.text]);
 

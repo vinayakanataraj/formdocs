@@ -17,7 +17,7 @@ export default function FieldWrapper({ label, helpText, required, children, clas
 
   useEffect(() => {
     if (labelRef.current && document.activeElement !== labelRef.current) {
-      labelRef.current.innerHTML = label ?? "";
+      labelRef.current.textContent = label ?? "";
     }
   }, [label]);
 

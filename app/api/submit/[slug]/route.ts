@@ -4,6 +4,8 @@ import { isAdminRequestValid } from "@/lib/auth";
 import { buildSubmissionSchema } from "@/lib/validation/form-schema";
 import { slugify, ensureBlockSlugs } from "@/lib/utils";
 import type { WebhookPayload, WebhookHeader, Block } from "@/lib/types";
+import fs from "fs";
+import path from "path";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -13,17 +15,75 @@ function isSafeWebhookUrl(urlString: string): boolean {
   try {
     const url = new URL(urlString);
     if (url.protocol !== "http:" && url.protocol !== "https:") return false;
-    const h = url.hostname;
-    // Block loopback, private ranges, link-local, and cloud metadata endpoints
-    if (h === "localhost" || h === "127.0.0.1" || h === "::1" || h === "0.0.0.0") return false;
-    if (h === "169.254.169.254") return false; // AWS/GCP metadata
+    const h = url.hostname.toLowerCase();
+
+    // Block loopback and unroutable
+    if (h === "localhost" || h === "0.0.0.0") return false;
+
+    // IPv4: loopback, private, link-local, metadata
+    if (h === "127.0.0.1" || h === "169.254.169.254") return false;
     if (/^10\.\d+\.\d+\.\d+$/.test(h)) return false;
     if (/^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(h)) return false;
     if (/^192\.168\.\d+\.\d+$/.test(h)) return false;
+    // Block decimal/octal-encoded IPs (e.g. 2130706433 = 127.0.0.1)
+    if (/^\d+$/.test(h)) return false;
+    if (/^0\d+(\.\d+)*$/.test(h)) return false;
+
+    // IPv6: loopback, link-local, unique-local, IPv4-mapped private
+    if (h === "::1" || h === "::") return false;
+    if (h.startsWith("fe80:") || h.startsWith("[fe80:")) return false;
+    if (h.startsWith("fc") || h.startsWith("fd")) return false;
+    if (h.startsWith("::ffff:")) {
+      // IPv4-mapped — check the embedded IPv4 address
+      const ipv4 = h.slice(7);
+      if (!isSafeWebhookUrl(`http://${ipv4}/`)) return false;
+    }
+
+    // Block internal hostnames
     if (h.endsWith(".internal") || h.endsWith(".local")) return false;
+
     return true;
   } catch {
     return false;
+  }
+}
+
+// ─── In-memory rate limiter (sliding window) ──────────────────────────────────
+// Limits: 10 submissions per IP per slug per minute
+
+const rateLimitStore = new Map<string, number[]>();
+const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+
+function checkRateLimit(ip: string, slug: string): boolean {
+  const key = `${ip}:${slug}`;
+  const now = Date.now();
+  const timestamps = (rateLimitStore.get(key) ?? []).filter(
+    (t) => now - t < RATE_LIMIT_WINDOW_MS
+  );
+  if (timestamps.length >= RATE_LIMIT_MAX) return false;
+  timestamps.push(now);
+  rateLimitStore.set(key, timestamps);
+  return true;
+}
+
+// ─── Failed submission persistence ────────────────────────────────────────────
+
+function persistFailedSubmission(
+  slug: string,
+  payload: WebhookPayload,
+  error: string
+): void {
+  try {
+    const dir = path.join(process.cwd(), "data", "failed-submissions", slug);
+    fs.mkdirSync(dir, { recursive: true });
+    const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.json`;
+    fs.writeFileSync(
+      path.join(dir, filename),
+      JSON.stringify({ payload, error, failedAt: new Date().toISOString() }, null, 2)
+    );
+  } catch (err) {
+    console.error("Failed to persist failed submission:", err);
   }
 }
 
@@ -84,7 +144,13 @@ async function sendWithRetry(
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
-      const res = await fetch(url, { ...options, signal: controller.signal, cache: "no-store" });
+      const res = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        cache: "no-store",
+        // Do not follow redirects — prevents SSRF via redirect chains
+        redirect: "error",
+      });
       clearTimeout(timer);
       return res;
     } catch (err) {
@@ -102,6 +168,15 @@ async function sendWithRetry(
 
 export async function POST(req: NextRequest, { params }: Params) {
   const { slug } = await params;
+
+  // Rate limiting: 10 submissions per IP per slug per minute
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  if (!checkRateLimit(ip, slug)) {
+    return NextResponse.json(
+      { error: "Too many submissions. Please try again later." },
+      { status: 429, headers: { "Retry-After": "60" } }
+    );
+  }
 
   const form = await getForm(slug);
   if (!form) {
@@ -182,16 +257,26 @@ export async function POST(req: NextRequest, { params }: Params) {
       body = JSON.stringify(payload);
     }
 
-    const response = await sendWithRetry(
-      form.webhook.url,
-      { method: form.webhook.method, headers, body },
-      form.webhook.retries,
-      form.webhook.timeoutSeconds * 1000
-    );
+    let response: Response;
+    try {
+      response = await sendWithRetry(
+        form.webhook.url,
+        { method: form.webhook.method, headers, body },
+        form.webhook.retries,
+        form.webhook.timeoutSeconds * 1000
+      );
+    } catch (err) {
+      const errorMsg = String(err);
+      console.error(`Webhook delivery failed for form ${slug}:`, err);
+      persistFailedSubmission(slug, payload, errorMsg);
+      return NextResponse.json({ error: "Failed to deliver submission" }, { status: 500 });
+    }
 
     if (!response.ok) {
-      const body = await response.text().catch(() => "(unreadable)");
-      console.error(`Webhook returned ${response.status} for form ${slug}: ${body}`);
+      const responseBody = await response.text().catch(() => "(unreadable)");
+      const errorMsg = `Webhook returned ${response.status}: ${responseBody}`;
+      console.error(`Webhook error for form ${slug}: ${errorMsg}`);
+      persistFailedSubmission(slug, payload, errorMsg);
       return NextResponse.json(
         { error: "Webhook returned an error", status: response.status },
         { status: 502 }
@@ -201,7 +286,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Submit error:", err);
-    return NextResponse.json({ error: "Failed to deliver submission" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to process submission" }, { status: 500 });
   }
 }
 

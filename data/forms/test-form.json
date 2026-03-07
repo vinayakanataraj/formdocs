@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "title": "Test form",
+    "slug": "test-form",
+    "description": "This is a test form",
+    "coverImageUrl": "",
+    "iconEmoji": "",
+    "accentColor": "#0f172a",
+    "logoUrl": "",
+    "footerText": "",
+    "submitButtonText": "Submit",
+    "successMessage": "Thank you! Your response has been submitted.",
+    "redirectUrl": "",
+    "createdAt": "2026-03-06T08:10:14.440Z",
+    "updatedAt": "2026-03-06T08:14:53.572Z"
+  },
+  "webhook": {
+    "url": "https://hook.eu1.make.com/j2ea6prfneq098ctqrerrolykuhxx7ut",
+    "method": "POST",
+    "headers": [
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "payloadFormat": "json",
+    "retries": 2,
+    "timeoutSeconds": 10
+  },
+  "blocks": [
+    {
+      "id": "SJ2Mr8vROdWswBo5HfM2L",
+      "type": "heading2",
+      "properties": {
+        "text": "Details"
+      }
+    },
+    {
+      "id": "Ed3iwVWBKKdTRvZfgqK5R",
+      "type": "short_text",
+      "properties": {
+        "label": "First Name",
+        "slug": "short_text",
+        "placeholder": "Enter first name",
+        "required": false
+      }
+    },
+    {
+      "id": "5vnAYz_t_BacDguXnWv5N",
+      "type": "phone",
+      "properties": {
+        "label": "Phone",
+        "slug": "phone",
+        "placeholder": "",
+        "required": false,
+        "countryCode": false
+      }
+    },
+    {
+      "id": "N3V-BuOMRO_rbCpbU1sV9",
+      "type": "email",
+      "properties": {
+        "label": "Email",
+        "slug": "email",
+        "placeholder": "you@example.com",
+        "required": false
+      }
+    },
+    {
+      "id": "QWUlTA2mKbBNLMMegAqz-",
+      "type": "itemisation",
+      "properties": {
+        "label": "Itemisation",
+        "slug": "itemisation",
+        "addButtonLabel": "+ Add Item",
+        "rowLabelTemplate": "Item {n}",
+        "minRows": 1,
+        "maxRows": 50,
+        "computedFields": [],
+        "summaryFields": []
+      },
+      "children": [
+        {
+          "id": "6dQzBnKXjadBo8q13L9k2",
+          "type": "single_select",
+          "properties": {
+            "label": "Product",
+            "slug": "product",
+            "required": false,
+            "options": [
+              "Product A",
+              "Product B"
+            ],
+            "display": "dropdown",
+            "placeholder": "Select a product"
+          }
+        },
+        {
+          "id": "bwyZHlDN59plkHfRJ4hJq",
+          "type": "number",
+          "properties": {
+            "label": "Quantity",
+            "slug": "quantity",
+            "placeholder": "",
+            "required": false,
+            "step": 1,
+            "decimalPrecision": 0
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,582 @@
+{
+  "meta": {
+    "title": "BuildurNest — Rs 2199/sqft Package",
+    "slug": "buildurnest-2199",
+    "description": "BuildurNest construction proposal — Rs 2199 per sqft (Premium Package)",
+    "coverImageUrl": "",
+    "iconEmoji": "",
+    "accentColor": "#7c3aed",
+    "logoUrl": "",
+    "footerText": "BuildurNest — Building Dreams",
+    "submitButtonText": "Submit Proposal",
+    "successMessage": "Thank you! The proposal has been submitted successfully.",
+    "redirectUrl": "",
+    "createdAt": "2026-03-06T00:00:00.000Z",
+    "updatedAt": "2026-03-06T00:00:00.000Z"
+  },
+  "webhook": {
+    "url": "",
+    "method": "POST",
+    "headers": [],
+    "payloadFormat": "json",
+    "retries": 2,
+    "timeoutSeconds": 10
+  },
+  "blocks": [
+    {
+      "id": "c1A2b3C4d5E6f7G8h9I0j",
+      "type": "heading1",
+      "properties": { "text": "Client Information" }
+    },
+    {
+      "id": "c2K3l4M5n6O7p8Q9r0St",
+      "type": "short_text",
+      "properties": { "label": "Client Name", "slug": "client_name", "placeholder": "", "required": true }
+    },
+    {
+      "id": "c3U4v5W6x7Y8z9A0b1Cd",
+      "type": "phone",
+      "properties": { "label": "Phone", "slug": "phone", "placeholder": "", "required": true, "countryCode": false }
+    },
+    {
+      "id": "c4E5f6G7h8I9j0K1l2Mn",
+      "type": "email",
+      "properties": { "label": "Email", "slug": "email", "placeholder": "you@example.com", "required": false }
+    },
+    {
+      "id": "c5O6p7Q8r9S0t1U2v3Wx",
+      "type": "short_text",
+      "properties": { "label": "Site Address", "slug": "site_address", "placeholder": "", "required": false }
+    },
+    {
+      "id": "c6Y7z8A9b0C1d2E3f4Gh",
+      "type": "short_text",
+      "properties": { "label": "Plot Dimensions", "slug": "plot_dimensions", "placeholder": "e.g. 30x40", "required": false }
+    },
+    {
+      "id": "c7I8j9K0l1M2n3O4p5Qr",
+      "type": "number",
+      "properties": { "label": "Built-up Area (sqft)", "slug": "builtup_area_sqft", "placeholder": "", "required": false, "step": 1, "decimalPrecision": 0 }
+    },
+    {
+      "id": "c8S9t0U1v2W3x4Y5z6Ab",
+      "type": "number",
+      "properties": { "label": "Number of Floors", "slug": "num_floors", "placeholder": "", "required": false, "step": 1, "decimalPrecision": 0 }
+    },
+    {
+      "id": "c9C0d1E2f3G4h5I6j7Kl",
+      "type": "page_break",
+      "properties": { "label": "Design & Civil Works" }
+    },
+    {
+      "id": "cA0M1n2O3p4Q5r6S7t8Uv",
+      "type": "heading2",
+      "properties": { "text": "Design & Drawings" }
+    },
+    {
+      "id": "cB1W2x3Y4z5A6b7C8d9Ef",
+      "type": "yes_no",
+      "properties": { "label": "Architectural 2D Floor Plan (All Floors)", "slug": "dd_floor_plan", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cC2G3h4I5j6K7l8M9n0Op",
+      "type": "yes_no",
+      "properties": { "label": "3D External Elevation Design (High Detail)", "slug": "dd_3d_elevation", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cD3Q4r5S6t7U8v9W0x1Yz",
+      "type": "yes_no",
+      "properties": { "label": "Structural Drawings (Foundation, Column, Beam)", "slug": "dd_structural_drawings", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cE4A5b6C7d8E9f0G1h2Ij",
+      "type": "yes_no",
+      "properties": { "label": "MEP Coordination Drawings", "slug": "dd_mep_drawings", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cF5K6l7M8n9O0p1Q2r3St",
+      "type": "heading2",
+      "properties": { "text": "Civil Works" }
+    },
+    {
+      "id": "cG6U7v8W9x0Y1z2A3b4Cd",
+      "type": "yes_no",
+      "properties": { "label": "PCC (M15 Grade) — Plain Cement Concrete", "slug": "cw_pcc", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cH7E8f9G0h1I2j3K4l5Mn",
+      "type": "yes_no",
+      "properties": { "label": "RCC Frame Structure (M25 Grade Concrete, Fe500D Steel)", "slug": "cw_rcc_frame", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cI8O9p0Q1r2S3t4U5v6Wx",
+      "type": "yes_no",
+      "properties": { "label": "Brick Masonry (9\" External, 4.5\" Internal Walls)", "slug": "cw_brick_masonry", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cJ9Y0z1A2b3C4d5E6f7Gh",
+      "type": "yes_no",
+      "properties": { "label": "Internal & External Plastering (12mm + 6mm, Double Coat)", "slug": "cw_plastering", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cK0I1j2K3l4M5n6O7p8Qr",
+      "type": "yes_no",
+      "properties": { "label": "Basement & Terrace Waterproofing (Crystalline + Membrane)", "slug": "cw_waterproofing", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cL1S2t3U4v5W6x7Y8z9Ab",
+      "type": "heading2",
+      "properties": { "text": "Architectural Design" }
+    },
+    {
+      "id": "cM2C3d4E5f6G7h8I9j0Kl",
+      "type": "yes_no",
+      "properties": { "label": "Site Plan & Floor Plan Design", "slug": "ad_site_floor_plan", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cN3M4n5O6p7Q8r9S0t1Uv",
+      "type": "yes_no",
+      "properties": { "label": "Section & Elevation Drawings", "slug": "ad_section_elevation", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cO4W5x6Y7z8A9b0C1d2Ef",
+      "type": "yes_no",
+      "properties": { "label": "Staircase Design", "slug": "ad_staircase_design", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cP5G6h7I8j9K0l1M2n3Op",
+      "type": "page_break",
+      "properties": { "label": "Interior & Structural" }
+    },
+    {
+      "id": "cQ6Q7r8S9t0U1v2W3x4Yz",
+      "type": "heading2",
+      "properties": { "text": "Interior Design" }
+    },
+    {
+      "id": "cR7A8b9C0d1E2f3G4h5Ij",
+      "type": "yes_no",
+      "properties": { "label": "Full Furniture Layout Plan", "slug": "id_furniture_layout", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cS8K9l0M1n2O3p4Q5r6St",
+      "type": "yes_no",
+      "properties": { "label": "Interior 3D Visualisation (All Rooms)", "slug": "id_3d_views", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cT9U0v1W2x3Y4z5A6b7Cd",
+      "type": "yes_no",
+      "properties": { "label": "Material Board, Colour Scheme & Finish Schedule", "slug": "id_material_board", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cU0E1f2G3h4I5j6K7l8Mn",
+      "type": "yes_no",
+      "properties": { "label": "False Ceiling Design Plan (POP / Gypsum)", "slug": "id_false_ceiling_design", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cV1O2p3Q4r5S6t7U8v9Wx",
+      "type": "heading2",
+      "properties": { "text": "Structural Designing" }
+    },
+    {
+      "id": "cW2Y3z4A5b6C7d8E9f0Gh",
+      "type": "yes_no",
+      "properties": { "label": "Structural Analysis & Design Report", "slug": "sd_structural_analysis", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cX3I4j5K6l7M8n9O0p1Qr",
+      "type": "yes_no",
+      "properties": { "label": "Foundation & Footing Design (IS Code)", "slug": "sd_foundation_design", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cY4S5t6U7v8W9x0Y1z2Ab",
+      "type": "yes_no",
+      "properties": { "label": "Column, Beam & Slab Design (IS 456)", "slug": "sd_column_beam_slab", "required": false, "defaultState": true }
+    },
+    {
+      "id": "cZ5C6d7E8f9G0h1I2j3Kl",
+      "type": "heading2",
+      "properties": { "text": "MEP Designing" }
+    },
+    {
+      "id": "dA6M7n8O9p0Q1r2S3t4Uv",
+      "type": "yes_no",
+      "properties": { "label": "Electrical Layout Design", "slug": "mep_electrical_layout", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dB7W8x9Y0z1A2b3C4d5Ef",
+      "type": "yes_no",
+      "properties": { "label": "Plumbing Layout Design", "slug": "mep_plumbing_layout", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dC8G9h0I1j2K3l4M5n6Op",
+      "type": "heading2",
+      "properties": { "text": "Government Liaison Assistance" }
+    },
+    {
+      "id": "dD9Q0r1S2t3U4v5W6x7Yz",
+      "type": "yes_no",
+      "properties": { "label": "Plan Approval Assistance", "slug": "gov_plan_approval", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dE0A1b2C3d4E5f6G7h8Ij",
+      "type": "yes_no",
+      "properties": { "label": "Building License & Permission Assistance", "slug": "gov_building_license", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dF1K2l3M4n5O6p7Q8r9St",
+      "type": "yes_no",
+      "properties": { "label": "Occupancy Certificate Assistance", "slug": "gov_oc_assistance", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dG2U3v4W5x6Y7z8A9b0Cd",
+      "type": "page_break",
+      "properties": { "label": "Flooring & Painting" }
+    },
+    {
+      "id": "dH3E4f5G6h7I8j9K0l1Mn",
+      "type": "heading2",
+      "properties": { "text": "Flooring & Wall Tiling" }
+    },
+    {
+      "id": "dI4O5p6Q7r8S9t0U1v2Wx",
+      "type": "yes_no",
+      "properties": { "label": "Living & Dining Area Flooring (Premium Vitrified Tiles)", "slug": "fl_living_dining", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dJ5Y6z7A8b9C0d1E2f3Gh",
+      "type": "currency",
+      "properties": { "label": "Living/Dining Tile Rate (per sqft)", "slug": "fl_living_tile_rate", "placeholder": "85", "required": false, "currencySymbol": "Rs.", "decimalPlaces": 0 }
+    },
+    {
+      "id": "dK6I7j8K9l0M1n2O3p4Qr",
+      "type": "yes_no",
+      "properties": { "label": "Bedroom Flooring (Premium Vitrified / Wooden Laminate)", "slug": "fl_bedroom", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dL7S8t9U0v1W2x3Y4z5Ab",
+      "type": "currency",
+      "properties": { "label": "Bedroom Tile/Flooring Rate (per sqft)", "slug": "fl_bedroom_tile_rate", "placeholder": "85", "required": false, "currencySymbol": "Rs.", "decimalPlaces": 0 }
+    },
+    {
+      "id": "dM8C9d0E1f2G3h4I5j6Kl",
+      "type": "yes_no",
+      "properties": { "label": "Kitchen Floor & Dado Tiling (Premium Ceramic / Vitrified)", "slug": "fl_kitchen_tiling", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dN9M0n1O2p3Q4r5S6t7Uv",
+      "type": "yes_no",
+      "properties": { "label": "Bathroom Wall & Floor Tiling (Premium Ceramic)", "slug": "fl_bathroom_tiling", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dO0W1x2Y3z4A5b6C7d8Ef",
+      "type": "yes_no",
+      "properties": { "label": "Balcony / Terrace Anti-Skid Tiles", "slug": "fl_balcony_terrace", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dP1G2h3I4j5K6l7M8n9Op",
+      "type": "heading2",
+      "properties": { "text": "Painting" }
+    },
+    {
+      "id": "dQ2Q3r4S5t6U7v8W9x0Yz",
+      "type": "yes_no",
+      "properties": { "label": "Interior Walls — Primer + 2 Coats (Premium Emulsion — Asian Royale / Berger Silk)", "slug": "paint_interior", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dR3A4b5C6d7E8f9G0h1Ij",
+      "type": "yes_no",
+      "properties": { "label": "Exterior Painting (Premium Weatherproof — Asian Apex / Berger WeatherCoat)", "slug": "paint_exterior", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dS4K5l6M7n8O9p0Q1r2St",
+      "type": "yes_no",
+      "properties": { "label": "Wood Work Painting (Premium PU Paint)", "slug": "paint_woodwork", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dT5U6v7W8x9Y0z1A2b3Cd",
+      "type": "page_break",
+      "properties": { "label": "Electrical & Plumbing" }
+    },
+    {
+      "id": "dU6E7f8G9h0I1j2K3l4Mn",
+      "type": "heading2",
+      "properties": { "text": "Electrical" }
+    },
+    {
+      "id": "dV7O8p9Q0r1S2t3U4v5Wx",
+      "type": "yes_no",
+      "properties": { "label": "Concealed Copper Wiring (Havells / Polycab)", "slug": "elec_wiring", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dW8Y9z0A1b2C3d4E5f6Gh",
+      "type": "yes_no",
+      "properties": { "label": "Modular Switches & Sockets (Premium — Legrand / Schneider)", "slug": "elec_switches", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dX9I0j1K2l3M4n5O6p7Qr",
+      "type": "yes_no",
+      "properties": { "label": "Main Distribution Board (MCB + RCCB + Surge Protection)", "slug": "elec_db", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dY0S1t2U3v4W5x6Y7z8Ab",
+      "type": "yes_no",
+      "properties": { "label": "Earthing & Grounding", "slug": "elec_earthing", "required": false, "defaultState": true }
+    },
+    {
+      "id": "dZ1C2d3E4f5G6h7I8j9Kl",
+      "type": "yes_no",
+      "properties": { "label": "Light, Fan, AC, TV & Data Points Provision", "slug": "elec_points", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eA2M3n4O5p6Q7r8S9t0Uv",
+      "type": "heading2",
+      "properties": { "text": "Plumbing" }
+    },
+    {
+      "id": "eB3W4x5Y6z7A8b9C0d1Ef",
+      "type": "yes_no",
+      "properties": { "label": "CPVC Pipes for Hot & Cold Water Supply (Ashirvad / Supreme)", "slug": "plmb_cpvc_pipes", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eC4G5h6I7j8K9l0M1n2Op",
+      "type": "yes_no",
+      "properties": { "label": "UPVC / PVC Drainage Pipes", "slug": "plmb_drainage", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eD5Q6r7S8t9U0v1W2x3Yz",
+      "type": "yes_no",
+      "properties": { "label": "Overhead Tank Connection & Plumbing", "slug": "plmb_overhead_tank", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eE6A7b8C9d0E1f2G3h4Ij",
+      "type": "yes_no",
+      "properties": { "label": "Underground Sump Construction & Connection", "slug": "plmb_sump", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eF7K8l9M0n1O2p3Q4r5St",
+      "type": "heading2",
+      "properties": { "text": "Fixtures" }
+    },
+    {
+      "id": "eG8U9v0W1x2Y3z4A5b6Cd",
+      "type": "yes_no",
+      "properties": { "label": "Sanitary Ware (Kohler / Roca / Toto — Premium Range)", "slug": "fix_sanitary_ware", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eH9E0f1G2h3I4j5K6l7Mn",
+      "type": "currency",
+      "properties": { "label": "Sanitary Ware Budget (all bathrooms)", "slug": "fix_sanitary_budget", "placeholder": "50000", "required": false, "currencySymbol": "Rs.", "decimalPlaces": 0 }
+    },
+    {
+      "id": "eI0O1p2Q3r4S5t6U7v8Wx",
+      "type": "yes_no",
+      "properties": { "label": "CP Fittings (Premium — Jaquar / Grohe)", "slug": "fix_cp_fittings", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eJ1Y2z3A4b5C6d7E8f9Gh",
+      "type": "currency",
+      "properties": { "label": "CP Fittings Budget", "slug": "fix_cp_budget", "placeholder": "25000", "required": false, "currencySymbol": "Rs.", "decimalPlaces": 0 }
+    },
+    {
+      "id": "eK2I3j4K5l6M7n8O9p0Qr",
+      "type": "yes_no",
+      "properties": { "label": "Kitchen Sink with Tap (SS 304 Grade / Franke)", "slug": "fix_kitchen_sink", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eL3S4t5U6v7W8x9Y0z1Ab",
+      "type": "page_break",
+      "properties": { "label": "Doors, Windows & Fabrication" }
+    },
+    {
+      "id": "eM4C5d6E7f8G9h0I1j2Kl",
+      "type": "heading2",
+      "properties": { "text": "Doors" }
+    },
+    {
+      "id": "eN5M6n7O8p9Q0r1S2t3Uv",
+      "type": "yes_no",
+      "properties": { "label": "Main Door (Solid Teak / Burma Teak Frame with Designer Panel)", "slug": "door_main", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eO6W7x8Y9z0A1b2C3d4Ef",
+      "type": "currency",
+      "properties": { "label": "Main Door Budget", "slug": "door_main_budget", "placeholder": "30000", "required": false, "currencySymbol": "Rs.", "decimalPlaces": 0 }
+    },
+    {
+      "id": "eP7G8h9I0j1K2l3M4n5Op",
+      "type": "yes_no",
+      "properties": { "label": "Bedroom Flush Doors with Frame (HDF / Veneer Finish)", "slug": "door_bedroom", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eQ8Q9r0S1t2U3v4W5x6Yz",
+      "type": "currency",
+      "properties": { "label": "Bedroom Door Budget (per door)", "slug": "door_bedroom_budget", "placeholder": "15000", "required": false, "currencySymbol": "Rs.", "decimalPlaces": 0 }
+    },
+    {
+      "id": "eR9A0b1C2d3E4f5G6h7Ij",
+      "type": "yes_no",
+      "properties": { "label": "Bathroom / Toilet Doors (WPC Frame with Designer Panel)", "slug": "door_bathroom", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eS0K1l2M3n4O5p6Q7r8St",
+      "type": "heading2",
+      "properties": { "text": "Windows" }
+    },
+    {
+      "id": "eT1U2v3W4x5Y6z7A8b9Cd",
+      "type": "yes_no",
+      "properties": { "label": "UPVC Sliding / Casement Windows with Glass", "slug": "win_upvc_windows", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eU2E3f4G5h6I7j8K9l0Mn",
+      "type": "currency",
+      "properties": { "label": "Window Rate (per sqft)", "slug": "win_rate_per_sqft", "placeholder": "260", "required": false, "currencySymbol": "Rs.", "decimalPlaces": 0 }
+    },
+    {
+      "id": "eV3O4p5Q6r7S8t9U0v1Wx",
+      "type": "yes_no",
+      "properties": { "label": "MS Window Grills (Powder Coated)", "slug": "win_ms_grills", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eW4Y5z6A7b8C9d0E1f2Gh",
+      "type": "heading2",
+      "properties": { "text": "Fabrication" }
+    },
+    {
+      "id": "eX5I6j7K8l9M0n1O2p3Qr",
+      "type": "yes_no",
+      "properties": { "label": "SS (Stainless Steel) Staircase Railing", "slug": "fab_staircase_railing", "required": false, "defaultState": true }
+    },
+    {
+      "id": "eY6S7t8U9v0W1x2Y3z4Ab",
+      "type": "currency",
+      "properties": { "label": "Staircase Railing Rate (per running ft)", "slug": "fab_staircase_rate", "placeholder": "380", "required": false, "currencySymbol": "Rs.", "decimalPlaces": 0 }
+    },
+    {
+      "id": "eZ7C8d9E0f1G2h3I4j5Kl",
+      "type": "yes_no",
+      "properties": { "label": "SS Balcony / Terrace Railing", "slug": "fab_balcony_railing", "required": false, "defaultState": true }
+    },
+    {
+      "id": "fA8M9n0O1p2Q3r4S5t6Uv",
+      "type": "page_break",
+      "properties": { "label": "Compound Wall & Elevation" }
+    },
+    {
+      "id": "fB9W0x1Y2z3A4b5C6d7Ef",
+      "type": "heading2",
+      "properties": { "text": "Compound Wall" }
+    },
+    {
+      "id": "fC0G1h2I3j4K5l6M7n8Op",
+      "type": "yes_no",
+      "properties": { "label": "Brick Compound Wall (4.5\" — 6ft Height)", "slug": "cmpd_brick_wall", "required": false, "defaultState": true }
+    },
+    {
+      "id": "fD1Q2r3S4t5U6v7W8x9Yz",
+      "type": "yes_no",
+      "properties": { "label": "Main Gate (MS / Aluminium Designer Gate)", "slug": "cmpd_main_gate", "required": false, "defaultState": true }
+    },
+    {
+      "id": "fE2A3b4C5d6E7f8G9h0Ij",
+      "type": "currency",
+      "properties": { "label": "Main Gate Budget", "slug": "cmpd_gate_budget", "placeholder": "25000", "required": false, "currencySymbol": "Rs.", "decimalPlaces": 0 }
+    },
+    {
+      "id": "fF3K4l5M6n7O8p9Q0r1St",
+      "type": "yes_no",
+      "properties": { "label": "Side / Back Gate (MS Powder Coated)", "slug": "cmpd_side_gate", "required": false, "defaultState": true }
+    },
+    {
+      "id": "fG4U5v6W7x8Y9z0A1b2Cd",
+      "type": "heading2",
+      "properties": { "text": "Elevation" }
+    },
+    {
+      "id": "fH5E6f7G8h9I0j1K2l3Mn",
+      "type": "yes_no",
+      "properties": { "label": "Elevation Design & Execution (Premium)", "slug": "elev_design", "required": false, "defaultState": true }
+    },
+    {
+      "id": "fI6O7p8Q9r0S1t2U3v4Wx",
+      "type": "yes_no",
+      "properties": { "label": "External Texture / Stone Cladding on Elevation", "slug": "elev_cladding", "required": false, "defaultState": true }
+    },
+    {
+      "id": "fJ7Y8z9A0b1C2d3E4f5Gh",
+      "type": "yes_no",
+      "properties": { "label": "Parapet Wall with Designer Coping", "slug": "elev_parapet", "required": false, "defaultState": true }
+    },
+    {
+      "id": "fK8I9j0K1l2M3n4O5p6Qr",
+      "type": "page_break",
+      "properties": { "label": "Exclusions & Terms" }
+    },
+    {
+      "id": "fL9S0t1U2v3W4x5Y6z7Ab",
+      "type": "heading2",
+      "properties": { "text": "Exclusions & Incidentals" }
+    },
+    {
+      "id": "fM0C1d2E3f4G5h6I7j8Kl",
+      "type": "paragraph",
+      "properties": { "text": "The following items are NOT included in this package and will be charged separately if required:" }
+    },
+    {
+      "id": "fN1M2n3O4p5Q6r7S8t9Uv",
+      "type": "bulleted_list",
+      "properties": { "items": [
+        "Bore well / Well Drilling",
+        "Rainwater Harvesting System",
+        "Solar Panel Installation",
+        "Modular Kitchen",
+        "Built-in Wardrobes / Cabinets",
+        "Home Automation / Smart Home Systems",
+        "Generator / Inverter Installation",
+        "Lift / Elevator",
+        "Swimming Pool",
+        "Landscaping & Garden",
+        "Sewage Treatment Plant (STP)",
+        "External Road / Driveway beyond site boundary",
+        "Any government fees, taxes, or statutory charges",
+        "Soil Testing (if required separately)",
+        "Any extra work beyond agreed scope"
+      ] }
+    },
+    {
+      "id": "fO2W3x4Y5z6A7b8C9d0Ef",
+      "type": "heading2",
+      "properties": { "text": "Payment Structure" }
+    },
+    {
+      "id": "fP3G4h5I6j7K8l9M0n1Op",
+      "type": "callout",
+      "properties": {
+        "text": "Stage 1 — Agreement: 10% of total project cost\nStage 2 — Foundation Completion: 15%\nStage 3 — Ground Floor Slab Casting: 15%\nStage 4 — Brick Work Completion (All Floors): 15%\nStage 5 — Plastering Completion: 15%\nStage 6 — Flooring & Tiling Completion: 10%\nStage 7 — Electrical & Plumbing Completion: 10%\nStage 8 — Handover & Completion: 10%",
+        "emoji": "💡",
+        "backgroundColor": "yellow"
+      }
+    },
+    {
+      "id": "fQ4Q5r6S7t8U9v0W1x2Yz",
+      "type": "heading2",
+      "properties": { "text": "Warranty & Guarantee" }
+    },
+    {
+      "id": "fR5A6b7C8d9E0f1G2h3Ij",
+      "type": "yes_no",
+      "properties": { "label": "Structural Warranty — 2 Years", "slug": "warr_structural_2yr", "required": false, "defaultState": true }
+    },
+    {
+      "id": "fS6K7l8M9n0O1p2Q3r4St",
+      "type": "yes_no",
+      "properties": { "label": "Waterproofing Warranty — 2 Years", "slug": "warr_waterproofing_2yr", "required": false, "defaultState": true }
+    },
+    {
+      "id": "fT7U8v9W0x1Y2z3A4b5Cd",
+      "type": "yes_no",
+      "properties": { "label": "Defect Liability Period — 18 Months Post Handover", "slug": "warr_defect_liability", "required": false, "defaultState": true }
+    }
+  ]
+}

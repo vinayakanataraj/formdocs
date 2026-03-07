@@ -25,7 +25,12 @@ function addBlockToSchema(shape: Record<string, z.ZodTypeAny>, block: Block) {
       if (p.minLength) s = s.min(p.minLength, `Minimum ${p.minLength} characters`);
       if (p.maxLength) s = s.max(p.maxLength, `Maximum ${p.maxLength} characters`);
       if (p.regex) {
-        try { s = s.regex(new RegExp(p.regex), p.patternMessage ?? "Invalid format"); } catch {}
+        try {
+          // Guard against ReDoS: reject patterns longer than 200 chars or with nested quantifiers
+          if (p.regex.length <= 200 && !/(\+\+|\*\*|\+\*|\*\+|\{[^}]+\}[+*])/.test(p.regex)) {
+            s = s.regex(new RegExp(p.regex), p.patternMessage ?? "Invalid format");
+          }
+        } catch {}
       }
       shape[block.id] = p.required ? s.min(1, "This field is required") : s.optional();
       break;
@@ -106,8 +111,39 @@ function addBlockToSchema(shape: Record<string, z.ZodTypeAny>, block: Block) {
     }
 
     case "file_upload": {
-      // Files are handled separately (base64 encoded)
-      shape[block.id] = p.required ? z.any().refine((v) => v != null, "Please upload a file") : z.any().optional();
+      const maxBytes = (p.maxFileSizeMb ?? 10) * 1024 * 1024;
+      const acceptedTypes: string[] = p.acceptedTypes ?? [];
+
+      const fileSchema = z.any().superRefine((v, ctx) => {
+        if (v == null) {
+          if (p.required) ctx.addIssue({ code: "custom", message: "Please upload a file" });
+          return;
+        }
+        // v is expected to be { name: string, type: string, data: string (base64) }
+        if (typeof v !== "object") return;
+        const file = v as { name?: string; type?: string; data?: string };
+
+        // Validate MIME type against allowed types
+        if (acceptedTypes.length > 0 && file.type) {
+          const allowed = acceptedTypes.some((t) => {
+            if (t.endsWith("/*")) return file.type!.startsWith(t.slice(0, -2));
+            return file.type === t;
+          });
+          if (!allowed) {
+            ctx.addIssue({ code: "custom", message: `File type not allowed. Accepted: ${acceptedTypes.join(", ")}` });
+          }
+        }
+
+        // Validate file size via base64 length (base64 is ~4/3 of binary size)
+        if (file.data) {
+          const estimatedBytes = Math.ceil((file.data.length * 3) / 4);
+          if (estimatedBytes > maxBytes) {
+            ctx.addIssue({ code: "custom", message: `File exceeds maximum size of ${p.maxFileSizeMb ?? 10}MB` });
+          }
+        }
+      });
+
+      shape[block.id] = fileSchema;
       break;
     }
 

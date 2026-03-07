@@ -20,7 +20,8 @@ export default function HeadingBlock({ block, onChange, readOnly }: EditorBlockP
 
   useEffect(() => {
     if (ref.current && document.activeElement !== ref.current) {
-      ref.current.innerHTML = props.text ?? "";
+      // Use textContent (not innerHTML) to prevent XSS — headings are plain text only
+      ref.current.textContent = props.text ?? "";
     }
   }, [props.text]);
 

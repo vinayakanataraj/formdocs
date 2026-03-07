@@ -9,7 +9,7 @@ export default function QuoteBlock({ block, onChange, readOnly }: EditorBlockPro
 
   useEffect(() => {
     if (ref.current && document.activeElement !== ref.current) {
-      ref.current.innerHTML = props.text ?? "";
+      ref.current.textContent = props.text ?? "";
     }
   }, [props.text]);
 

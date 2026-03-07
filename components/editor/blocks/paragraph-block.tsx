@@ -11,7 +11,8 @@ export default function ParagraphBlock({ block, onChange, readOnly }: EditorBloc
 
   useEffect(() => {
     if (ref.current && document.activeElement !== ref.current) {
-      ref.current.innerHTML = props.text ?? "";
+      // Use textContent (not innerHTML) to prevent XSS — paragraphs are plain text only
+      ref.current.textContent = props.text ?? "";
     }
   }, [props.text]);
 

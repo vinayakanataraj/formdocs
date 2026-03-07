@@ -22,19 +22,25 @@ export default function EditorShell({ initialForm }: EditorShellProps) {
   const updateMeta = useEditorStore((s) => s.updateMeta);
   const [saveError, setSaveError] = useState<string | null>(null);
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     initForm(initialForm);
   }, [initialForm, initForm]);
 
   const save = useCallback(async () => {
+    // Mutex: skip if a save is already in-flight to prevent out-of-order writes
+    if (savingRef.current) return;
+    savingRef.current = true;
     setIsSaving(true);
     setSaveError(null);
+    // Capture form state at save start so markSaved isn't called on stale dirty state
+    const savedForm = form;
     try {
-      const res = await fetch(`/api/forms/${form.meta.slug}`, {
+      const res = await fetch(`/api/forms/${savedForm.meta.slug}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(savedForm),
       });
       if (res.ok) {
         markSaved();
@@ -45,9 +51,19 @@ export default function EditorShell({ initialForm }: EditorShellProps) {
     } catch {
       setSaveError("Network error");
     } finally {
+      savingRef.current = false;
       setIsSaving(false);
     }
   }, [form, markSaved, setIsSaving]);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isDirty) e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
 
   // Auto-save on change (debounced 2s)
   useEffect(() => {

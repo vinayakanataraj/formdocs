@@ -4,7 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { useEditorStore } from "@/lib/store/editor";
 import { searchBlocks, BlockDefinition } from "@/lib/blocks/definitions";
 import type { BlockType } from "@/lib/types";
-import * as Icons from "lucide-react";
+import {
+  Heading1, Heading2, Heading3, AlignLeft, List, ListOrdered, Quote,
+  MessageSquare, Minus, Type, AlignJustify, Mail, Phone, Hash, DollarSign,
+  Calendar, ChevronDown, CheckSquare, Upload, Star, ToggleLeft, Columns2,
+  ArrowUpDown, SquareSplitVertical, Table, Square,
+} from "lucide-react";
 
 const CATEGORY_LABELS: Record<string, string> = {
   content: "Content",
@@ -15,9 +20,15 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 type LucideIcon = React.ComponentType<{ className?: string }>;
 
+const ICON_MAP: Record<string, LucideIcon> = {
+  Heading1, Heading2, Heading3, AlignLeft, List, ListOrdered, Quote,
+  MessageSquare, Minus, Type, AlignJustify, Mail, Phone, Hash, DollarSign,
+  Calendar, ChevronDown, CheckSquare, Upload, Star, ToggleLeft, Columns2,
+  ArrowUpDown, SquareSplitVertical, Table, Square,
+};
+
 function getIcon(name: string): LucideIcon {
-  const icon = (Icons as unknown as Record<string, LucideIcon | undefined>)[name];
-  return icon ?? Icons.Square;
+  return ICON_MAP[name] ?? Square;
 }
 
 export default function SlashCommandPalette() {

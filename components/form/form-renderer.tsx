@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -52,6 +52,21 @@ function getAllFieldIds(blocks: Block[]): string[] {
 
 const STORAGE_KEY = (slug: string) => `formdocs_autosave_${slug}`;
 
+// Mirror the visibility check from form-block-renderer to filter hidden fields before submission
+function isBlockVisible(block: Block, values: Record<string, unknown>): boolean {
+  const rule = (block.properties as BaseBlockProps)?.visibilityRule;
+  if (!rule) return true;
+  const refValue = values[rule.fieldId];
+  switch (rule.operator) {
+    case "equals": return String(refValue) === String(rule.value);
+    case "not_equals": return String(refValue) !== String(rule.value);
+    case "contains": return String(refValue).includes(String(rule.value));
+    case "is_empty": return refValue === undefined || refValue === null || refValue === "";
+    case "is_not_empty": return refValue !== undefined && refValue !== null && refValue !== "";
+    default: return true;
+  }
+}
+
 export default function FormRenderer({ form }: FormRendererProps) {
   const router = useRouter();
   const pages = useMemo(() => splitIntoPages(form.blocks), [form.blocks]);
@@ -71,6 +86,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
 
   const { watch, handleSubmit, trigger } = methods;
   const values = watch();
+  const autosaveTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Restore autosave on mount
   useEffect(() => {
@@ -80,11 +96,15 @@ export default function FormRenderer({ form }: FormRendererProps) {
     } catch {}
   }, [form.meta.slug, methods]);
 
-  // Autosave on value change
+  // Debounced autosave (500ms) — avoids writing to sessionStorage on every keystroke
   useEffect(() => {
-    try {
-      sessionStorage.setItem(STORAGE_KEY(form.meta.slug), JSON.stringify(values));
-    } catch {}
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = setTimeout(() => {
+      try {
+        sessionStorage.setItem(STORAGE_KEY(form.meta.slug), JSON.stringify(values));
+      } catch {}
+    }, 500);
+    return () => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current); };
   }, [values, form.meta.slug]);
 
   // Progress: count how many required fields have values
@@ -115,11 +135,14 @@ export default function FormRenderer({ form }: FormRendererProps) {
     setSubmitError(null);
 
     try {
-      // Build webhook payload
+      // Build webhook payload — exclude fields hidden by visibility rules
       const fields: Record<string, { label: string; value: unknown }> = {};
       const itemisations: Record<string, unknown[]> = {};
 
       for (const block of form.blocks) {
+        // Skip fields that are currently hidden by visibility rules
+        if (!isBlockVisible(block, data as Record<string, unknown>)) continue;
+
         if (block.type === "itemisation") {
           itemisations[block.id] = data[block.id] ?? [];
         } else if (data[block.id] !== undefined) {
