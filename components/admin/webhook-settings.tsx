@@ -194,6 +194,22 @@ export default function WebhookSettings() {
         </div>
       </div>
 
+      {/* Wait for response */}
+      <div className="space-y-1.5">
+        <label className="flex items-center gap-2 text-xs cursor-pointer">
+          <input
+            type="checkbox"
+            checked={wh.waitForResponse ?? false}
+            onChange={(e) => updateWebhook({ waitForResponse: e.target.checked })}
+            className="accent-primary"
+          />
+          <span className="font-medium">Wait for response</span>
+        </label>
+        <p className="text-xs text-muted-foreground">
+          Display the webhook&apos;s response on the thank you screen after submission.
+        </p>
+      </div>
+
       {/* Test button */}
       <div className="space-y-2">
         <button

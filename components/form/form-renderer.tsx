@@ -8,7 +8,7 @@ import type { Block, BaseBlockProps, Form } from "@/lib/types";
 import { buildSubmissionSchema } from "@/lib/validation/form-schema";
 import FormBlockRenderer from "@/components/form/form-block-renderer";
 import ProgressBar from "@/components/form/progress-bar";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 
 interface FormRendererProps {
   form: Form;
@@ -74,6 +74,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [webhookResponse, setWebhookResponse] = useState<{ status: number; body: string } | null>(null);
 
   const schema = useMemo(() => buildSubmissionSchema(form.blocks), [form.blocks]);
   const requiredIds = useMemo(() => getRequiredFieldIds(form.blocks), [form.blocks]);
@@ -158,16 +159,23 @@ export default function FormRenderer({ form }: FormRendererProps) {
         body: JSON.stringify({ fields, itemisations }),
       });
 
-      if (res.ok) {
+      const result = await res.json();
+
+      if (res.ok && result.success) {
         sessionStorage.removeItem(STORAGE_KEY(form.meta.slug));
-        if (form.meta.redirectUrl) {
+        if (form.meta.redirectUrl && !result.webhookResponse) {
           router.push(form.meta.redirectUrl);
         } else {
+          if (result.webhookResponse) setWebhookResponse(result.webhookResponse);
           setSubmitted(true);
         }
+      } else if (result.webhookResponse) {
+        // waitForResponse is on and webhook returned a non-2xx — show the error response
+        sessionStorage.removeItem(STORAGE_KEY(form.meta.slug));
+        setWebhookResponse(result.webhookResponse);
+        setSubmitted(true);
       } else {
-        const err = await res.json();
-        setSubmitError(err.error ?? "Something went wrong. Please try again.");
+        setSubmitError(result.error ?? "Something went wrong. Please try again.");
       }
     } catch {
       setSubmitError("Network error. Please check your connection and try again.");
@@ -177,12 +185,40 @@ export default function FormRenderer({ form }: FormRendererProps) {
   }
 
   if (submitted) {
+    const isWebhookError = webhookResponse && webhookResponse.status >= 300;
+    const StatusIcon = webhookResponse
+      ? webhookResponse.status >= 500
+        ? XCircle
+        : webhookResponse.status >= 400
+          ? AlertTriangle
+          : CheckCircle
+      : CheckCircle;
+    const iconColor = webhookResponse
+      ? webhookResponse.status >= 500
+        ? "text-destructive"
+        : webhookResponse.status >= 400
+          ? "text-amber-500"
+          : "text-green-500"
+      : "text-green-500";
+
     return (
       <div className="text-center py-16 space-y-4">
-        <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />
+        <StatusIcon className={`w-12 h-12 ${iconColor} mx-auto`} />
         <h2 className="text-xl font-semibold">
-          {form.meta.successMessage || "Thank you! Your response has been submitted."}
+          {isWebhookError
+            ? `Server returned an error (HTTP ${webhookResponse.status})`
+            : (form.meta.successMessage || "Thank you! Your response has been submitted.")}
         </h2>
+        {webhookResponse != null && (
+          <div className="mt-2 mx-auto max-w-lg text-left">
+            <div className={`p-4 rounded-md text-xs ${isWebhookError ? "bg-destructive/10 border border-destructive/20" : "bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800"}`}>
+              <p className="font-medium text-muted-foreground mb-2">Response (HTTP {webhookResponse.status})</p>
+              <pre className="text-foreground whitespace-pre-wrap break-words font-mono">
+                {webhookResponse.body || "(empty response body)"}
+              </pre>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -251,7 +287,9 @@ export default function FormRenderer({ form }: FormRendererProps) {
               style={form.meta.accentColor ? { backgroundColor: form.meta.accentColor } : undefined}
             >
               {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              {submitting ? "Submitting…" : (form.meta.submitButtonText || "Submit")}
+              {submitting
+                ? (form.webhook.waitForResponse ? "Waiting for response…" : "Submitting…")
+                : (form.meta.submitButtonText || "Submit")}
             </button>
           )}
         </div>

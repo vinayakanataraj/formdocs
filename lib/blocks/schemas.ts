@@ -161,6 +161,7 @@ export const webhookConfigSchema = z.object({
   payloadFormat: z.enum(["json", "form_urlencoded"]),
   retries: z.number().min(0).max(3),
   timeoutSeconds: z.number().min(1).max(60),
+  waitForResponse: z.boolean().optional(),
 });
 
 // ─── Form Meta Schema ──────────────────────────────────────────────────────────

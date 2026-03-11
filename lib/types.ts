@@ -232,6 +232,7 @@ export interface WebhookConfig {
   payloadFormat: "json" | "form_urlencoded";
   retries: number; // 0–3
   timeoutSeconds: number;
+  waitForResponse?: boolean;
 }
 
 // ─── Form Meta ─────────────────────────────────────────────────────────────────

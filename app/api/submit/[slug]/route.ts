@@ -277,10 +277,33 @@ export async function POST(req: NextRequest, { params }: Params) {
       const errorMsg = `Webhook returned ${response.status}: ${responseBody}`;
       console.error(`Webhook error for form ${slug}: ${errorMsg}`);
       persistFailedSubmission(slug, payload, errorMsg);
+      if (form.webhook.waitForResponse) {
+        return NextResponse.json(
+          {
+            success: false,
+            webhookResponse: {
+              status: response.status,
+              body: responseBody.slice(0, 5000),
+            },
+          },
+          { status: 502 }
+        );
+      }
       return NextResponse.json(
         { error: "Webhook returned an error", status: response.status },
         { status: 502 }
       );
+    }
+
+    if (form.webhook.waitForResponse) {
+      const responseBody = await response.text().catch(() => "");
+      return NextResponse.json({
+        success: true,
+        webhookResponse: {
+          status: response.status,
+          body: responseBody.slice(0, 5000),
+        },
+      });
     }
 
     return NextResponse.json({ success: true });

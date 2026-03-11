@@ -26,6 +26,7 @@ export function createDefaultForm(slug: string, title: string = ""): Form {
       payloadFormat: "json",
       retries: 2,
       timeoutSeconds: 10,
+      waitForResponse: false,
     },
     blocks: [],
   };
