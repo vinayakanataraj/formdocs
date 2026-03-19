@@ -142,8 +142,14 @@ export interface CalloutProps {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DividerProps {}
 
+export interface ColumnDef {
+  id: string;
+  span: number;
+  blocks: Block[];
+}
+
 export interface ColumnLayoutProps {
-  columns?: 2 | 3;
+  columnDefs: ColumnDef[];
 }
 
 export interface SpacerProps {

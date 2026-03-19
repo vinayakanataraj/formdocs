@@ -105,7 +105,15 @@ function buildSlugMaps(blocks: Block[]): {
   const childSlugs = new Map<string, Map<string, string>>();
 
   for (const block of blocks) {
-    if (block.type === "itemisation") {
+    if (block.type === "column_layout") {
+      const p = block.properties as { columnDefs?: Array<{ id: string; span: number; blocks: Block[] }> };
+      for (const col of p.columnDefs ?? []) {
+        const nested = buildSlugMaps(col.blocks);
+        nested.fieldSlugs.forEach((v, k) => fieldSlugs.set(k, v));
+        nested.itemSlugs.forEach((v, k) => itemSlugs.set(k, v));
+        nested.childSlugs.forEach((v, k) => childSlugs.set(k, v));
+      }
+    } else if (block.type === "itemisation") {
       itemSlugs.set(block.id, getBlockSlug(block));
       const childMap = new Map<string, string>();
       for (const child of block.children ?? []) {
@@ -334,21 +342,29 @@ export async function PUT(req: NextRequest, { params }: Params) {
   const { fieldSlugs, itemSlugs, childSlugs } = buildSlugMaps(normalizedBlocks);
   const sampleData: Record<string, unknown> = {};
 
-  for (const block of normalizedBlocks) {
-    if (block.type === "itemisation") {
-      const key = itemSlugs.get(block.id) ?? block.id;
-      const childMap = childSlugs.get(block.id) ?? new Map<string, string>();
-      const sampleRow: Record<string, unknown> = {};
-      for (const child of block.children ?? []) {
-        sampleRow[childMap.get(child.id) ?? child.id] = `[sample ${child.type}]`;
+  function collectSampleData(blocks: Block[]) {
+    for (const block of blocks) {
+      if (block.type === "column_layout") {
+        const cp = block.properties as { columnDefs?: Array<{ id: string; span: number; blocks: Block[] }> };
+        for (const col of cp.columnDefs ?? []) {
+          collectSampleData(col.blocks);
+        }
+      } else if (block.type === "itemisation") {
+        const key = itemSlugs.get(block.id) ?? block.id;
+        const childMap = childSlugs.get(block.id) ?? new Map<string, string>();
+        const sampleRow: Record<string, unknown> = {};
+        for (const child of block.children ?? []) {
+          sampleRow[childMap.get(child.id) ?? child.id] = `[sample ${child.type}]`;
+        }
+        sampleData[key] = sampleRow ? [sampleRow] : [];
+      } else if (["short_text","long_text","email","phone","number","currency","date",
+        "single_select","multi_select","rating","yes_no","file_upload"].includes(block.type)) {
+        const key = fieldSlugs.get(block.id) ?? block.id;
+        sampleData[key] = `[sample ${block.type}]`;
       }
-      sampleData[key] = sampleRow ? [sampleRow] : [];
-    } else if (["short_text","long_text","email","phone","number","currency","date",
-      "single_select","multi_select","rating","yes_no","file_upload"].includes(block.type)) {
-      const key = fieldSlugs.get(block.id) ?? block.id;
-      sampleData[key] = `[sample ${block.type}]`;
     }
   }
+  collectSampleData(normalizedBlocks);
 
   const samplePayload: WebhookPayload = {
     meta: {

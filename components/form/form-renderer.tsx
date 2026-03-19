@@ -36,6 +36,12 @@ function getRequiredFieldIds(blocks: Block[]): string[] {
   for (const b of blocks) {
     if ((b.properties as BaseBlockProps).required) ids.push(b.id);
     if (b.children) ids.push(...getRequiredFieldIds(b.children));
+    if (b.type === "column_layout") {
+      const p = b.properties as { columnDefs?: Array<{ id: string; span: number; blocks: Block[] }> };
+      for (const col of p.columnDefs ?? []) {
+        ids.push(...getRequiredFieldIds(col.blocks));
+      }
+    }
   }
   return ids;
 }
@@ -46,6 +52,12 @@ function getAllFieldIds(blocks: Block[]): string[] {
   for (const b of blocks) {
     if (!LAYOUT_TYPES.has(b.type)) ids.push(b.id);
     if (b.children) ids.push(...getAllFieldIds(b.children));
+    if (b.type === "column_layout") {
+      const p = b.properties as { columnDefs?: Array<{ id: string; span: number; blocks: Block[] }> };
+      for (const col of p.columnDefs ?? []) {
+        ids.push(...getAllFieldIds(col.blocks));
+      }
+    }
   }
   return ids;
 }
@@ -140,18 +152,24 @@ export default function FormRenderer({ form }: FormRendererProps) {
       const fields: Record<string, { label: string; value: unknown }> = {};
       const itemisations: Record<string, unknown[]> = {};
 
-      for (const block of form.blocks) {
-        // Skip fields that are currently hidden by visibility rules
-        if (!isBlockVisible(block, data as Record<string, unknown>)) continue;
-
-        if (block.type === "itemisation") {
-          itemisations[block.id] = data[block.id] ?? [];
-        } else if (data[block.id] !== undefined) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const props = block.properties as any;
-          fields[block.id] = { label: props.label ?? block.type, value: data[block.id] };
+      function collectSubmissionData(blocks: Block[]) {
+        for (const block of blocks) {
+          if (!isBlockVisible(block, data as Record<string, unknown>)) continue;
+          if (block.type === "column_layout") {
+            const cp = block.properties as { columnDefs?: Array<{ id: string; span: number; blocks: Block[] }> };
+            for (const col of cp.columnDefs ?? []) {
+              collectSubmissionData(col.blocks);
+            }
+          } else if (block.type === "itemisation") {
+            itemisations[block.id] = data[block.id] ?? [];
+          } else if (data[block.id] !== undefined) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const props = block.properties as any;
+            fields[block.id] = { label: props.label ?? block.type, value: data[block.id] };
+          }
         }
       }
+      collectSubmissionData(form.blocks);
 
       const res = await fetch(`/api/submit/${form.meta.slug}`, {
         method: "POST",

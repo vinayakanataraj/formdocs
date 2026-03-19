@@ -7,7 +7,7 @@ A Notion-style, self-hostable, open-source form builder. Create and publish form
 - **Block-based editor** — 25 block types across content, fields, layout, and special categories
 - **Multi-page forms** — split long forms into steps with Page Break blocks
 - **Itemisation** — repeatable line-item tables with computed totals and expression-based fields (great for invoices, order forms)
-- **Column layouts** — arrange blocks in 2- or 3-column grids
+- **Flexible column layouts** — arrange blocks in up to 4 columns using a 12-grid preset system (halves, thirds, quarters, mixed widths); fields inside columns are fully validated on submission
 - **Webhook delivery** — submissions are proxied server-side so your webhook URL and secrets never reach the browser
 - **Configurable webhooks** — custom headers, JSON or `application/x-www-form-urlencoded` payload formats, retry logic, timeouts
 - **Per-form settings** — accent color, logo, cover image, icon emoji, redirect URL, custom success message, submit button text
@@ -260,7 +260,7 @@ Content-Type: application/json
 }
 ```
 
-`children` is only used by `column_layout` and `itemisation`. IDs can be any unique string.
+`children` is only used by `itemisation` (defines row columns). For `column_layout`, blocks live inside `properties.columnDefs[n].blocks`. IDs can be any unique string.
 
 **The `slug` property on field blocks becomes the key in the webhook payload.**
 
@@ -338,7 +338,7 @@ Content-Type: application/json
 | Field | `file_upload` | `label`, `slug`, `acceptedTypes: string[]`, `maxFileSizeMb` |
 | Field | `rating` | `label`, `slug`, `maxStars` (1–10), `iconStyle: "stars"\|"hearts"\|"thumbs"` |
 | Field | `yes_no` | `label`, `slug`, `defaultState: boolean` |
-| Layout | `column_layout` | `columns: 2\|3` — put field blocks in `children` |
+| Layout | `column_layout` | `columnDefs: ColumnDef[]` — each column has `id`, `span` (1–12, must sum to 12), and `blocks: Block[]`; up to 4 columns |
 | Layout | `spacer` | `height: number` (px) |
 | Layout | `page_break` | `label: string` (button text, default `"Next"`) |
 | Special | `itemisation` | `label`, `slug`, `computedFields`, `summaryFields` — field columns go in `children` |
@@ -383,7 +383,7 @@ A Claude skill is available at `skills/formdocs-form-composer/SKILL.md`. Load it
 ### Layout
 | Block | Description |
 |---|---|
-| Columns | 2- or 3-column grid |
+| Columns | Flexible multi-column layout (up to 4 columns) using a 12-grid preset system |
 | Spacer | Adjustable vertical whitespace |
 | Page Break | Splits form into multi-step pages |
 

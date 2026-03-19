@@ -6,6 +6,7 @@ import {
   DragOverlay,
   DragStartEvent,
   PointerSensor,
+  pointerWithin,
   closestCenter,
   useSensor,
   useSensors,
@@ -15,15 +16,35 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useState } from "react";
-import { useEditorStore } from "@/lib/store/editor";
+import { useEditorStore, type ContainerLocation } from "@/lib/store/editor";
 import SortableBlock from "@/components/editor/sortable-block";
 import BlockRenderer from "@/components/editor/block-renderer";
-import type { Block } from "@/lib/types";
+import type { Block, ColumnLayoutProps } from "@/lib/types";
 import { Plus } from "lucide-react";
+
+// Find which container a block belongs to
+function findBlockContainer(
+  blocks: Block[],
+  blockId: string
+): ContainerLocation | null {
+  if (blocks.some((b) => b.id === blockId)) return { type: "top-level" };
+  for (const b of blocks) {
+    if (b.type === "column_layout") {
+      const p = b.properties as ColumnLayoutProps;
+      for (let i = 0; i < (p.columnDefs ?? []).length; i++) {
+        if (p.columnDefs[i].blocks.some((cb) => cb.id === blockId)) {
+          return { type: "column", layoutId: b.id, columnIndex: i };
+        }
+      }
+    }
+  }
+  return null;
+}
 
 export default function BlockList() {
   const form = useEditorStore((s) => s.form);
   const moveBlock = useEditorStore((s) => s.moveBlock);
+  const moveBlockBetweenContainers = useEditorStore((s) => s.moveBlockBetweenContainers);
   const openSlashCommand = useEditorStore((s) => s.openSlashCommand);
   const [activeBlock, setActiveBlock] = useState<Block | null>(null);
 
@@ -32,23 +53,81 @@ export default function BlockList() {
   );
 
   function handleDragStart(e: DragStartEvent) {
-    const block = form.blocks.find((b) => b.id === e.active.id);
+    const blockId = e.active.id as string;
+    let block: Block | undefined = form.blocks.find((b) => b.id === blockId);
+    if (!block) {
+      for (const b of form.blocks) {
+        if (b.type === "column_layout") {
+          const p = b.properties as ColumnLayoutProps;
+          for (const col of p.columnDefs ?? []) {
+            const found = col.blocks.find((cb) => cb.id === blockId);
+            if (found) { block = found; break; }
+          }
+        }
+        if (block) break;
+      }
+    }
     setActiveBlock(block ?? null);
   }
 
   function handleDragEnd(e: DragEndEvent) {
     const { active, over } = e;
     setActiveBlock(null);
-    if (over && active.id !== over.id) {
-      moveBlock(active.id as string, over.id as string);
+    if (!over || active.id === over.id) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const overData = over.data?.current as Record<string, unknown> | undefined;
+
+    let targetContainer: ContainerLocation;
+    if (overId.startsWith("column:")) {
+      const parts = overId.split(":");
+      targetContainer = { type: "column", layoutId: parts[1], columnIndex: parseInt(parts[2]) };
+    } else if (overData?.type === "column-block") {
+      targetContainer = {
+        type: "column",
+        layoutId: overData.layoutId as string,
+        columnIndex: overData.columnIndex as number,
+      };
+    } else {
+      targetContainer = { type: "top-level" };
     }
+
+    const sourceContainer = findBlockContainer(form.blocks, activeId);
+    if (!sourceContainer) return;
+
+    // Same top-level container: simple reorder
+    if (
+      sourceContainer.type === "top-level" &&
+      targetContainer.type === "top-level"
+    ) {
+      moveBlock(activeId, overId);
+      return;
+    }
+
+    // Cross-container move
+    moveBlockBetweenContainers(activeId, sourceContainer, targetContainer);
+  }
+
+  // Custom collision detection: prefer column droppables
+  function collisionDetection(args: Parameters<typeof pointerWithin>[0]) {
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) {
+      const colDroppable = pointerCollisions.find(
+        (c) => typeof c.id === "string" && (c.id as string).startsWith("column:")
+      );
+      if (colDroppable) return [colDroppable];
+      return pointerCollisions;
+    }
+    return closestCenter(args);
   }
 
   return (
     <div className="space-y-0">
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCenter}
+        collisionDetection={collisionDetection}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >

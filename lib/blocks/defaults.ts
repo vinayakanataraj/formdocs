@@ -31,7 +31,12 @@ export function createBlock(type: BlockType, overrides: Partial<Block> = {}): Bl
     yes_no: { label: "Yes / No", slug: "yes_no", required: false, defaultState: false },
 
     // Layout
-    column_layout: { columns: 2 },
+    column_layout: {
+      columnDefs: [
+        { id: nanoid(), span: 6, blocks: [] },
+        { id: nanoid(), span: 6, blocks: [] },
+      ],
+    },
     spacer: { height: 32 },
     page_break: { label: "Next" },
 
@@ -52,7 +57,7 @@ export function createBlock(type: BlockType, overrides: Partial<Block> = {}): Bl
     id,
     type,
     properties: defaultProperties[type] ?? {},
-    children: type === "itemisation" || type === "column_layout" ? [] : undefined,
+    children: type === "itemisation" ? [] : undefined,
     ...overrides,
   };
 }

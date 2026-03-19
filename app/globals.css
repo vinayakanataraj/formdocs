@@ -128,3 +128,13 @@
     font-family: var(--font-sans);
   }
 }
+
+/* Responsive column layout: stack on mobile */
+@media (max-width: 640px) {
+  .column-layout-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .column-layout-grid > div {
+    grid-column: 1 / -1 !important;
+  }
+}

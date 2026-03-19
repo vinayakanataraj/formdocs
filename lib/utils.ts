@@ -31,25 +31,40 @@ export function ensureBlockSlugs<T extends { id: string; type: string; propertie
       ? ensureBlockSlugs(block.children, usedSlugs)
       : block.children;
 
-    if (!FIELD_BLOCK_TYPES.has(block.type)) {
-      return children !== block.children ? { ...block, children } : block;
+    // Recurse into column_layout columnDefs
+    let properties = block.properties as Record<string, unknown>;
+    if (block.type === "column_layout") {
+      const p = properties as { columnDefs?: Array<{ id: string; span: number; blocks: T[] }> };
+      if (p.columnDefs) {
+        const newDefs = p.columnDefs.map((col) => ({
+          ...col,
+          blocks: ensureBlockSlugs(col.blocks, usedSlugs),
+        }));
+        properties = { ...properties, columnDefs: newDefs };
+      }
     }
 
-    const p = block.properties as Record<string, unknown>;
-    const existingSlug = p.slug as string | undefined;
+    if (!FIELD_BLOCK_TYPES.has(block.type)) {
+      const changed = children !== block.children || properties !== (block.properties as Record<string, unknown>);
+      return changed ? { ...block, properties: properties as T["properties"], children } : block;
+    }
+
+    const p2 = properties as Record<string, unknown>;
+    const existingSlug = p2.slug as string | undefined;
     if (existingSlug && existingSlug.trim() !== "") {
       usedSlugs.add(existingSlug);
-      return children !== block.children ? { ...block, children } : block;
+      const changed = children !== block.children || properties !== (block.properties as Record<string, unknown>);
+      return changed ? { ...block, properties: properties as T["properties"], children } : block;
     }
 
     // Derive slug from label, de-duplicate with a numeric suffix if needed
-    const base = slugify((p.label as string | undefined) ?? block.type) || block.type;
+    const base = slugify((p2.label as string | undefined) ?? block.type) || block.type;
     let candidate = base;
     let n = 1;
     while (usedSlugs.has(candidate)) {
       candidate = `${base}_${n++}`;
     }
     usedSlugs.add(candidate);
-    return { ...block, properties: { ...p, slug: candidate } as T["properties"], children };
+    return { ...block, properties: { ...p2, slug: candidate } as T["properties"], children };
   });
 }

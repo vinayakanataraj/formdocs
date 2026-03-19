@@ -196,9 +196,67 @@ Inherits base field props, plus:
 
 | Property | Type | Default | Notes |
 |---|---|---|---|
-| `columns` | `2 \| 3` | `2` | Number of columns |
+| `columnDefs` | `ColumnDef[]` | two `span:6` columns | Array of column definitions. All spans must sum to 12. |
 
-`children` **required** — array of column blocks. Each column is itself a block (typically with `children` of its own for the nested fields).
+`children` is **not used** for `column_layout`. Blocks go inside each `ColumnDef`'s `blocks` array.
+
+#### ColumnDef object
+
+| Property | Type | Required | Notes |
+|---|---|---|---|
+| `id` | `string` | yes | Unique column ID (nanoid recommended) |
+| `span` | `number` | yes | Grid width (1–12). All spans in the layout must sum to 12. |
+| `blocks` | `Block[]` | yes | Blocks rendered inside this column. Cannot contain `column_layout`, `itemisation`, or `page_break`. |
+
+**Preset span combinations:**
+
+| Preset | Spans | Description |
+|---|---|---|
+| 1/2 + 1/2 | `[6, 6]` | Two equal columns |
+| 1/3 × 3 | `[4, 4, 4]` | Three equal columns |
+| 1/4 × 4 | `[3, 3, 3, 3]` | Four equal columns |
+| 2/3 + 1/3 | `[8, 4]` | Wide left |
+| 1/3 + 2/3 | `[4, 8]` | Wide right |
+| 3/4 + 1/4 | `[9, 3]` | Extra wide left |
+| 1/4 + 3/4 | `[3, 9]` | Extra wide right |
+| 1/4 + 1/2 + 1/4 | `[3, 6, 3]` | Wide center |
+| 1/2 + 1/4 + 1/4 | `[6, 3, 3]` | Wide left, two narrow right |
+| 1/4 + 1/4 + 1/2 | `[3, 3, 6]` | Two narrow left, wide right |
+
+**Example — two equal columns:**
+
+```json
+{
+  "id": "blk_cols",
+  "type": "column_layout",
+  "properties": {
+    "columnDefs": [
+      {
+        "id": "col_a",
+        "span": 6,
+        "blocks": [
+          {
+            "id": "blk_first",
+            "type": "short_text",
+            "properties": { "label": "First Name", "slug": "first_name", "required": true }
+          }
+        ]
+      },
+      {
+        "id": "col_b",
+        "span": 6,
+        "blocks": [
+          {
+            "id": "blk_last",
+            "type": "short_text",
+            "properties": { "label": "Last Name", "slug": "last_name", "required": true }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
 ### `spacer`
 

@@ -69,20 +69,20 @@ export default function FormBlockRenderer({ block, allValues }: Props) {
 
     // Layout
     case "column_layout": {
-      const cols = p.columns ?? 2;
-      const children = block.children ?? [];
+      const columnDefs = (p.columnDefs ?? []) as Array<{ id: string; span: number; blocks: Block[] }>;
       return (
-        <div className={`grid gap-4 ${cols === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
-          {Array.from({ length: cols }).map((_, i) => {
-            const colBlocks = children.filter((_, bi) => bi % cols === i);
-            return (
-              <div key={i} className="space-y-4">
-                {colBlocks.map((child) => (
-                  <FormBlockRenderer key={child.id} block={child} allValues={allValues} />
-                ))}
-              </div>
-            );
-          })}
+        <div className="column-layout-grid grid gap-4" style={{ gridTemplateColumns: "repeat(12, 1fr)" }}>
+          {columnDefs.map((col) => (
+            <div
+              key={col.id}
+              className="space-y-4"
+              style={{ gridColumn: `span ${col.span} / span ${col.span}` }}
+            >
+              {col.blocks.map((child) => (
+                <FormBlockRenderer key={child.id} block={child} allValues={allValues} />
+              ))}
+            </div>
+          ))}
         </div>
       );
     }

@@ -160,6 +160,16 @@ function addBlockToSchema(shape: Record<string, z.ZodTypeAny>, block: Block) {
       break;
     }
 
+    case "column_layout": {
+      const colProps = block.properties as import("@/lib/types").ColumnLayoutProps;
+      for (const col of colProps.columnDefs ?? []) {
+        for (const child of col.blocks) {
+          addBlockToSchema(shape, child);
+        }
+      }
+      break;
+    }
+
     // Content/layout blocks — skip
     default:
       break;

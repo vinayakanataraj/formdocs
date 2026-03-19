@@ -103,7 +103,18 @@ export const calloutPropsSchema = z.object({
   backgroundColor: z.string().optional(),
 });
 export const dividerPropsSchema = z.object({});
-export const columnLayoutPropsSchema = z.object({ columns: z.union([z.literal(2), z.literal(3)]).optional() });
+// columnDefSchema uses z.lazy for recursive block validation
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const columnDefSchema: z.ZodType<any> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    span: z.number().min(1).max(12),
+    blocks: z.array(blockSchema),
+  })
+);
+export const columnLayoutPropsSchema = z.object({
+  columnDefs: z.array(columnDefSchema),
+});
 export const spacerPropsSchema = z.object({ height: z.number().optional() });
 export const pageBreakPropsSchema = z.object({ label: z.string().optional() });
 

@@ -37,6 +37,7 @@ export default function SlashCommandPalette() {
   const slashCommandBlockId = useEditorStore((s) => s.slashCommandBlockId);
   const closeSlashCommand = useEditorStore((s) => s.closeSlashCommand);
   const addBlock = useEditorStore((s) => s.addBlock);
+  const addBlockToColumn = useEditorStore((s) => s.addBlockToColumn);
   const setSlashQuery = useEditorStore((s) => s.setSlashQuery);
   const deleteBlock = useEditorStore((s) => s.deleteBlock);
   const blocks = useEditorStore((s) => s.form.blocks);
@@ -45,7 +46,14 @@ export default function SlashCommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const results = searchBlocks(slashCommandQuery);
+  // Detect column context from blockId prefix
+  const isColumnContext = slashCommandBlockId?.startsWith("__col__") ?? false;
+  const COLUMN_EXCLUDED_TYPES = new Set<BlockType>(["column_layout", "itemisation", "page_break"]);
+
+  const allResults = searchBlocks(slashCommandQuery);
+  const results = isColumnContext
+    ? allResults.filter((b) => !COLUMN_EXCLUDED_TYPES.has(b.type))
+    : allResults;
 
   // Group results
   const grouped = results.reduce<Record<string, BlockDefinition[]>>((acc, b) => {
@@ -70,6 +78,17 @@ export default function SlashCommandPalette() {
   }, [slashCommandQuery]);
 
   function insertBlock(type: BlockType) {
+    // Handle column context: __col__{layoutId}__{columnIndex}
+    if (slashCommandBlockId?.startsWith("__col__")) {
+      const parts = slashCommandBlockId.split("__").filter(Boolean);
+      // parts = ["col", layoutId, columnIndex]
+      const layoutId = parts[1];
+      const columnIndex = parseInt(parts[2]);
+      addBlockToColumn(layoutId, columnIndex, type);
+      closeSlashCommand();
+      return;
+    }
+
     // If the trigger block is empty, replace it
     if (slashCommandBlockId) {
       const triggerBlock = blocks.find((b) => b.id === slashCommandBlockId);

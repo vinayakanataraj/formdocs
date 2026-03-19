@@ -188,10 +188,10 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     type: "column_layout",
     label: "Columns",
-    description: "Split into 2 or 3 columns",
+    description: "Flexible multi-column layout with drag-and-drop",
     category: "layout",
     icon: "Columns2",
-    keywords: ["column", "columns", "layout", "grid", "side"],
+    keywords: ["column", "columns", "layout", "grid", "side", "section", "two", "three", "four"],
   },
   {
     type: "spacer",

@@ -79,7 +79,7 @@ An ordered array of block objects. Blocks render top-to-bottom in the form.
 - `id`: Any unique string. Use nanoid (`nanoid()`) or any UUID/random string.
 - `type`: One of the 25 block types listed below.
 - `properties`: Type-specific object (see details below or `references/block-properties.md`).
-- `children`: Only present for `itemisation` and `column_layout`. Array of child blocks.
+- `children`: Only present for `itemisation`. Array of child field blocks (defines columns of each row).
 
 ---
 
@@ -133,9 +133,36 @@ All field blocks share **base field properties**:
 
 | Type | Properties | Notes |
 |---|---|---|
-| `column_layout` | `columns: 2 \| 3` | `children` array holds one block per column; each column block has its own `children` array of nested field blocks |
+| `column_layout` | `columnDefs: ColumnDef[]` | Array of column definitions (spans must sum to 12); blocks go inside each column's `blocks` array — not in the top-level `children` field |
 | `spacer` | `height: number` (px) | Default `32` |
 | `page_break` | `label: string` | Default `"Next"` — splits form into pages |
+
+#### ColumnDef object
+
+```json
+{ "id": "<unique string>", "span": 6, "blocks": [ ... ] }
+```
+
+| Property | Type | Notes |
+|---|---|---|
+| `id` | `string` | Unique ID for this column (nanoid recommended) |
+| `span` | `number` | Width on a 12-grid: 1–12. All spans in a `column_layout` must sum to 12. |
+| `blocks` | `Block[]` | Blocks inside this column. Cannot contain `column_layout`, `itemisation`, or `page_break`. |
+
+**Preset span combinations** (all sum to 12):
+
+| Label | Spans |
+|---|---|
+| 1/2 + 1/2 | `[6, 6]` |
+| 1/3 × 3 | `[4, 4, 4]` |
+| 1/4 × 4 | `[3, 3, 3, 3]` |
+| 2/3 + 1/3 | `[8, 4]` |
+| 1/3 + 2/3 | `[4, 8]` |
+| 3/4 + 1/4 | `[9, 3]` |
+| 1/4 + 3/4 | `[3, 9]` |
+| 1/4 + 1/2 + 1/4 | `[3, 6, 3]` |
+| 1/2 + 1/4 + 1/4 | `[6, 3, 3]` |
+| 1/4 + 1/4 + 1/2 | `[3, 3, 6]` |
 
 ### Special (1 type)
 
@@ -508,6 +535,45 @@ Aggregations: `SUM`, `COUNT`, `AVERAGE`, `MIN`, `MAX`.
 
 ---
 
+### Column layout (two-column name + email side by side)
+
+```json
+{
+  "id": "blk_cols",
+  "type": "column_layout",
+  "properties": {
+    "columnDefs": [
+      {
+        "id": "col_left",
+        "span": 6,
+        "blocks": [
+          {
+            "id": "blk_first",
+            "type": "short_text",
+            "properties": { "label": "First Name", "slug": "first_name", "required": true }
+          }
+        ]
+      },
+      {
+        "id": "col_right",
+        "span": 6,
+        "blocks": [
+          {
+            "id": "blk_last",
+            "type": "short_text",
+            "properties": { "label": "Last Name", "slug": "last_name", "required": true }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+> Spans must sum to 12. Use `[8,4]` for a wide-left layout, `[4,4,4]` for three equal columns, `[3,3,3,3]` for four, etc. Cannot nest `column_layout`, `itemisation`, or `page_break` inside a column.
+
+---
+
 ## Step-by-Step Composition Guide
 
 1. **Start with `meta`**: set `title`, `slug` (kebab-case), `createdAt`/`updatedAt` (current ISO datetime).
@@ -516,7 +582,7 @@ Aggregations: `SUM`, `COUNT`, `AVERAGE`, `MIN`, `MAX`.
    - Add heading/paragraph blocks for section titles and instructions.
    - Add field blocks with meaningful `label` and `slug` values.
    - Use `page_break` to split into multiple steps.
-   - Use `column_layout` to place fields side by side.
+   - Use `column_layout` to place fields side by side (put blocks in each column's `blocks` array, not top-level `children`).
    - Use `itemisation` for repeatable rows with computed totals.
 4. **IDs**: Every block needs a unique `id`. Any unique string works: `"blk_01"`, `"V1StGXR8_Z5jdHi6B"`, etc.
 5. **Slugs**: Use `lowercase_with_underscores`. These become the keys in the webhook payload.
