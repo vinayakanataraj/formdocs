@@ -4,7 +4,7 @@ A Notion-style, self-hostable, open-source form builder. Create and publish form
 
 ## Features
 
-- **Block-based editor** — 25 block types across content, fields, layout, and special categories
+- **Block-based editor** — 26 block types across content, fields, layout, and special categories
 - **Multi-page forms** — split long forms into steps with Page Break blocks
 - **Itemisation** — repeatable line-item tables with computed totals and expression-based fields (great for invoices, order forms)
 - **Flexible column layouts** — arrange blocks in up to 4 columns using a 12-grid preset system (halves, thirds, quarters, mixed widths); fields inside columns are fully validated on submission
@@ -260,7 +260,23 @@ Content-Type: application/json
 }
 ```
 
-`children` is only used by `itemisation` (defines row columns). For `column_layout`, blocks live inside `properties.columnDefs[n].blocks`. IDs can be any unique string.
+`children` is used by `itemisation` and `itemisation_advanced` (defines row columns). For `column_layout`, blocks live inside `properties.columnDefs[n].blocks`. IDs can be any unique string.
+
+For `itemisation_advanced`, add a `defaultItems` array to `properties` to pre-populate rows:
+
+```json
+"defaultItems": [
+  {
+    "id": "di_01",
+    "values": [
+      { "fieldId": "<child block id>", "value": "Consulting" },
+      { "fieldId": "<child block id>", "value": 150 }
+    ]
+  }
+]
+```
+
+`fieldId` must match the `id` of a block in `children`. `value` type must match the field type (`string`, `number`, or `boolean`).
 
 **The `slug` property on field blocks becomes the key in the webhook payload.**
 
@@ -342,6 +358,7 @@ Content-Type: application/json
 | Layout | `spacer` | `height: number` (px) |
 | Layout | `page_break` | `label: string` (button text, default `"Next"`) |
 | Special | `itemisation` | `label`, `slug`, `computedFields`, `summaryFields` — field columns go in `children` |
+| Special | `itemisation_advanced` | All `itemisation` properties plus `defaultItems: DefaultItem[]` — pre-fills rows on first load |
 
 All field blocks also accept `placeholder`, `helpText`, and a `visibilityRule` object (`{ fieldId, operator, value }`).
 
@@ -391,6 +408,7 @@ A Claude skill is available at `skills/formdocs-form-composer/SKILL.md`. Load it
 | Block | Description |
 |---|---|
 | Itemisation | Repeatable line-item table with computed and summary fields |
+| Itemisation (Advanced) | Same as Itemisation with pre-configured default rows that auto-populate for form fillers |
 
 ## Extending the Block System
 

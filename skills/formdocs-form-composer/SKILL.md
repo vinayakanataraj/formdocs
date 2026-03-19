@@ -77,9 +77,9 @@ An ordered array of block objects. Blocks render top-to-bottom in the form.
 ```
 
 - `id`: Any unique string. Use nanoid (`nanoid()`) or any UUID/random string.
-- `type`: One of the 25 block types listed below.
+- `type`: One of the 26 block types listed below.
 - `properties`: Type-specific object (see details below or `references/block-properties.md`).
-- `children`: Only present for `itemisation`. Array of child field blocks (defines columns of each row).
+- `children`: Only present for `itemisation` and `itemisation_advanced`. Array of child field blocks (defines columns of each row).
 
 ---
 
@@ -164,11 +164,12 @@ All field blocks share **base field properties**:
 | 1/2 + 1/4 + 1/4 | `[6, 3, 3]` |
 | 1/4 + 1/4 + 1/2 | `[3, 3, 6]` |
 
-### Special (1 type)
+### Special (2 types)
 
 | Type | Notes |
 |---|---|
 | `itemisation` | Repeatable row table. `children` defines the column fields. Supports `computedFields` (per-row expressions) and `summaryFields` (cross-row aggregations). |
+| `itemisation_advanced` | Same as `itemisation`, plus a `defaultItems` array that pre-populates rows when the form first loads. Form fillers see these rows already filled in and can edit, remove, or add more. |
 
 ---
 
@@ -197,6 +198,31 @@ Show or hide a block conditionally based on another field's value:
 Operators: `equals`, `not_equals`, `contains`, `is_empty`, `is_not_empty`.
 
 Use `fieldId` = the `id` of another block (not the slug). `value` is always a string.
+
+---
+
+## `itemisation_advanced` — Default Items
+
+`itemisation_advanced` accepts all the same properties and `children` as `itemisation`, plus a `defaultItems` array:
+
+```json
+"defaultItems": [
+  {
+    "id": "<unique string>",
+    "values": [
+      { "fieldId": "<child block id>", "value": "Widget A" },
+      { "fieldId": "<child block id>", "value": 3 },
+      { "fieldId": "<child block id>", "value": 9.99 }
+    ]
+  }
+]
+```
+
+- Each entry in `defaultItems` is a pre-filled row.
+- `values` is a sparse array — you only need entries for fields you want to pre-fill; unset fields default to empty.
+- `fieldId` must match the `id` of a block in `children`.
+- `value` type must match the field type: `string` for text/select/date, `number` for number/currency, `boolean` for yes_no.
+- If the form is resumed from autosave, the saved rows are used instead (the guard prevents double-population).
 
 ---
 
@@ -535,6 +561,106 @@ Aggregations: `SUM`, `COUNT`, `AVERAGE`, `MIN`, `MAX`.
 
 ---
 
+### Itemisation Advanced (invoice with pre-filled default rows)
+
+```json
+{
+  "meta": {
+    "title": "Service Invoice",
+    "slug": "service-invoice",
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  },
+  "webhook": {
+    "url": "https://hooks.example.com/invoices",
+    "method": "POST",
+    "headers": [{ "key": "Content-Type", "value": "application/json" }],
+    "payloadFormat": "json",
+    "retries": 2,
+    "timeoutSeconds": 10
+  },
+  "blocks": [
+    {
+      "id": "blk_client",
+      "type": "short_text",
+      "properties": { "label": "Client Name", "slug": "client_name", "required": true }
+    },
+    {
+      "id": "blk_items",
+      "type": "itemisation_advanced",
+      "properties": {
+        "label": "Services",
+        "slug": "services",
+        "addButtonLabel": "+ Add Service",
+        "rowLabelTemplate": "Service {n}",
+        "minRows": 1,
+        "maxRows": 20,
+        "defaultItems": [
+          {
+            "id": "default_item_1",
+            "values": [
+              { "fieldId": "col_desc", "value": "Consulting" },
+              { "fieldId": "col_qty",  "value": 1 },
+              { "fieldId": "col_rate", "value": 150 }
+            ]
+          },
+          {
+            "id": "default_item_2",
+            "values": [
+              { "fieldId": "col_desc", "value": "Project Management" },
+              { "fieldId": "col_qty",  "value": 2 },
+              { "fieldId": "col_rate", "value": 100 }
+            ]
+          }
+        ],
+        "computedFields": [
+          {
+            "id": "comp_line",
+            "label": "Line Total",
+            "expression": "{Quantity} * {Rate}",
+            "format": "currency",
+            "currencySymbol": "$",
+            "decimalPlaces": 2
+          }
+        ],
+        "summaryFields": [
+          {
+            "id": "sum_total",
+            "label": "Total Due",
+            "aggregation": "SUM",
+            "sourceFieldId": "comp_line",
+            "format": "currency",
+            "currencySymbol": "$",
+            "decimalPlaces": 2
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": "col_desc",
+          "type": "short_text",
+          "properties": { "label": "Description", "slug": "description", "required": true }
+        },
+        {
+          "id": "col_qty",
+          "type": "number",
+          "properties": { "label": "Quantity", "slug": "quantity", "required": true, "min": 1, "step": 1, "decimalPrecision": 0 }
+        },
+        {
+          "id": "col_rate",
+          "type": "currency",
+          "properties": { "label": "Rate", "slug": "rate", "required": true, "currencySymbol": "$", "decimalPlaces": 2 }
+        }
+      ]
+    }
+  ]
+}
+```
+
+> **Key rule:** Every `fieldId` in `defaultItems[].values` must match the `id` of a block in `children`. Use `itemisation_advanced` instead of `itemisation` whenever you want rows pre-populated. Both block types support the same `computedFields`, `summaryFields`, and `children` structure.
+
+---
+
 ### Column layout (two-column name + email side by side)
 
 ```json
@@ -583,7 +709,7 @@ Aggregations: `SUM`, `COUNT`, `AVERAGE`, `MIN`, `MAX`.
    - Add field blocks with meaningful `label` and `slug` values.
    - Use `page_break` to split into multiple steps.
    - Use `column_layout` to place fields side by side (put blocks in each column's `blocks` array, not top-level `children`).
-   - Use `itemisation` for repeatable rows with computed totals.
+   - Use `itemisation` for repeatable rows with computed totals; use `itemisation_advanced` when you want rows pre-populated via `defaultItems`.
 4. **IDs**: Every block needs a unique `id`. Any unique string works: `"blk_01"`, `"V1StGXR8_Z5jdHi6B"`, etc.
 5. **Slugs**: Use `lowercase_with_underscores`. These become the keys in the webhook payload.
 6. **Required fields**: `single_select` and `multi_select` must have an `options` array.
