@@ -140,6 +140,20 @@ export const itemisationPropsSchema = z.object({
   summaryFields: z.array(summaryFieldSchema).optional(),
 });
 
+const defaultItemValueSchema = z.object({
+  fieldId: z.string(),
+  value: z.union([z.string(), z.number(), z.boolean()]),
+});
+
+const defaultItemSchema = z.object({
+  id: z.string(),
+  values: z.array(defaultItemValueSchema),
+});
+
+export const itemisationAdvancedPropsSchema = itemisationPropsSchema.extend({
+  defaultItems: z.array(defaultItemSchema),
+});
+
 // ─── Block Schema ──────────────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -151,7 +165,7 @@ export const blockSchema: z.ZodType<any> = z.lazy(() =>
       "bulleted_list", "numbered_list", "quote", "callout", "divider",
       "short_text", "long_text", "email", "phone", "number", "currency",
       "date", "single_select", "multi_select", "file_upload", "rating", "yes_no",
-      "column_layout", "spacer", "page_break", "itemisation",
+      "column_layout", "spacer", "page_break", "itemisation", "itemisation_advanced",
     ]),
     properties: z.record(z.string(), z.unknown()),
     children: z.array(blockSchema).optional(),

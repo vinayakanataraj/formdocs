@@ -148,7 +148,8 @@ function addBlockToSchema(shape: Record<string, z.ZodTypeAny>, block: Block) {
     }
 
     // For itemisation blocks, handle as nested arrays
-    case "itemisation": {
+    case "itemisation":
+    case "itemisation_advanced": {
       const rowSchema: Record<string, z.ZodTypeAny> = {};
       for (const child of block.children ?? []) {
         addBlockToSchema(rowSchema, child);

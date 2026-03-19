@@ -31,7 +31,8 @@ export type BlockType =
   | ContentBlockType
   | FieldBlockType
   | LayoutBlockType
-  | "itemisation";
+  | "itemisation"
+  | "itemisation_advanced";
 
 // ─── Conditional Visibility Rule ──────────────────────────────────────────────
 
@@ -190,6 +191,20 @@ export interface ItemisationProps {
   summaryFields?: SummaryField[];
 }
 
+export interface DefaultItemValue {
+  fieldId: string;
+  value: string | number | boolean;
+}
+
+export interface DefaultItem {
+  id: string;
+  values: DefaultItemValue[];
+}
+
+export interface ItemisationAdvancedProps extends ItemisationProps {
+  defaultItems: DefaultItem[];
+}
+
 export type BlockProperties =
   | ShortTextProps
   | LongTextProps
@@ -213,7 +228,8 @@ export type BlockProperties =
   | ColumnLayoutProps
   | SpacerProps
   | PageBreakProps
-  | ItemisationProps;
+  | ItemisationProps
+  | ItemisationAdvancedProps;
 
 // ─── Block ────────────────────────────────────────────────────────────────────
 

@@ -32,6 +32,7 @@ import PageBreakBlock from "@/components/editor/blocks/page-break-block";
 
 // Special
 import ItemisationBlock from "@/components/editor/blocks/itemisation-block";
+import ItemisationAdvancedBlock from "@/components/editor/blocks/itemisation-advanced-block";
 
 interface BlockRendererProps {
   block: Block;
@@ -100,6 +101,8 @@ export default function BlockRenderer({ block, readOnly = false }: BlockRenderer
     // Special
     case "itemisation":
       return <ItemisationBlock block={block} onChange={onChange} readOnly={readOnly} />;
+    case "itemisation_advanced":
+      return <ItemisationAdvancedBlock block={block} onChange={onChange} readOnly={readOnly} />;
 
     default:
       return (

@@ -113,7 +113,7 @@ function buildSlugMaps(blocks: Block[]): {
         nested.itemSlugs.forEach((v, k) => itemSlugs.set(k, v));
         nested.childSlugs.forEach((v, k) => childSlugs.set(k, v));
       }
-    } else if (block.type === "itemisation") {
+    } else if (block.type === "itemisation" || block.type === "itemisation_advanced") {
       itemSlugs.set(block.id, getBlockSlug(block));
       const childMap = new Map<string, string>();
       for (const child of block.children ?? []) {
@@ -349,7 +349,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
         for (const col of cp.columnDefs ?? []) {
           collectSampleData(col.blocks);
         }
-      } else if (block.type === "itemisation") {
+      } else if (block.type === "itemisation" || block.type === "itemisation_advanced") {
         const key = itemSlugs.get(block.id) ?? block.id;
         const childMap = childSlugs.get(block.id) ?? new Map<string, string>();
         const sampleRow: Record<string, unknown> = {};

@@ -52,7 +52,7 @@ export default function FieldConfigPanel({ block }: Props) {
   }
 
   const isField = ["short_text", "long_text", "email", "phone", "number", "currency",
-    "date", "single_select", "multi_select", "file_upload", "rating", "yes_no", "itemisation"].includes(block.type);
+    "date", "single_select", "multi_select", "file_upload", "rating", "yes_no", "itemisation", "itemisation_advanced"].includes(block.type);
 
   if (!isField) return <p className="text-xs text-muted-foreground">No configuration for this block type.</p>;
 
@@ -102,13 +102,13 @@ export default function FieldConfigPanel({ block }: Props) {
         <p className="text-[10px] text-muted-foreground mt-0.5">Used as the key in webhook JSON output.</p>
       </Row>
 
-      {block.type !== "divider" && block.type !== "yes_no" && block.type !== "rating" && block.type !== "itemisation" && (
+      {block.type !== "divider" && block.type !== "yes_no" && block.type !== "rating" && block.type !== "itemisation" && block.type !== "itemisation_advanced" && (
         <Row label="Placeholder">
           <TextInput value={p.placeholder} onChange={(v) => update({ placeholder: v })} placeholder="Placeholder text" />
         </Row>
       )}
 
-      {block.type !== "itemisation" && (
+      {block.type !== "itemisation" && block.type !== "itemisation_advanced" && (
         <>
           <Toggle value={p.required} onChange={(v) => update({ required: v })} label="Required" />
 

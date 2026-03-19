@@ -16,6 +16,7 @@ import FileUploadInput from "@/components/form/fields/file-upload-input";
 import RatingInput from "@/components/form/fields/rating-input";
 import YesNoInput from "@/components/form/fields/yes-no-input";
 import ItemisationRenderer from "@/components/form/itemisation-renderer";
+import ItemisationAdvancedRenderer from "@/components/form/itemisation-advanced-renderer";
 
 interface Props {
   block: Block;
@@ -101,6 +102,7 @@ export default function FormBlockRenderer({ block, allValues }: Props) {
     case "rating": return <RatingInput block={block} />;
     case "yes_no": return <YesNoInput block={block} />;
     case "itemisation": return <ItemisationRenderer block={block} allValues={allValues} />;
+    case "itemisation_advanced": return <ItemisationAdvancedRenderer block={block} allValues={allValues} />;
 
     default:
       return null;

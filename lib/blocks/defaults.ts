@@ -51,13 +51,24 @@ export function createBlock(type: BlockType, overrides: Partial<Block> = {}): Bl
       computedFields: [],
       summaryFields: [],
     },
+    itemisation_advanced: {
+      label: "Itemisation (Advanced)",
+      slug: "itemisation_advanced",
+      addButtonLabel: "+ Add Item",
+      rowLabelTemplate: "Item {n}",
+      minRows: 1,
+      maxRows: 50,
+      computedFields: [],
+      summaryFields: [],
+      defaultItems: [],
+    },
   };
 
   return {
     id,
     type,
     properties: defaultProperties[type] ?? {},
-    children: type === "itemisation" ? [] : undefined,
+    children: (type === "itemisation" || type === "itemisation_advanced") ? [] : undefined,
     ...overrides,
   };
 }

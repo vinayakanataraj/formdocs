@@ -219,6 +219,14 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     icon: "Table",
     keywords: ["item", "itemisation", "itemization", "line", "table", "repeat", "rows", "invoice", "order"],
   },
+  {
+    type: "itemisation_advanced",
+    label: "Itemisation (Advanced)",
+    description: "Repeatable multi-field line items with pre-configured default rows",
+    category: "special",
+    icon: "TableProperties",
+    keywords: ["itemisation", "advanced", "default", "prefill", "rows", "item", "table", "repeat"],
+  },
 ];
 
 export const CONTENT_BLOCKS = BLOCK_DEFINITIONS.filter((b) => b.category === "content");

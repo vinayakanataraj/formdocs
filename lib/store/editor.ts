@@ -235,8 +235,27 @@ export const useEditorStore = create<EditorStore>((set) => ({
       if (!block) return s;
       const dup: Block = JSON.parse(JSON.stringify(block));
       dup.id = nanoid();
+      const idMap = new Map<string, string>();
       if (dup.children?.length) {
-        dup.children = dup.children.map((c) => ({ ...c, id: nanoid() }));
+        dup.children = dup.children.map((c) => {
+          const newId = nanoid();
+          idMap.set(c.id, newId);
+          return { ...c, id: newId };
+        });
+      }
+      if (dup.type === "itemisation_advanced") {
+        const p = dup.properties as import("@/lib/types").ItemisationAdvancedProps;
+        dup.properties = {
+          ...p,
+          defaultItems: (p.defaultItems ?? []).map((item) => ({
+            ...item,
+            id: nanoid(),
+            values: item.values.map((v) => ({
+              ...v,
+              fieldId: idMap.get(v.fieldId) ?? v.fieldId,
+            })),
+          })),
+        };
       }
       // If it's a column_layout, give new IDs to all columnDefs and their blocks
       if (dup.type === "column_layout") {
@@ -402,10 +421,21 @@ export const useEditorStore = create<EditorStore>((set) => ({
     set((s) => ({
       form: {
         ...s.form,
-        blocks: updateBlockById(s.form.blocks, parentId, (b) => ({
-          ...b,
-          children: (b.children ?? []).filter((c) => c.id !== childId),
-        })),
+        blocks: updateBlockById(s.form.blocks, parentId, (b) => {
+          const updated: Block = {
+            ...b,
+            children: (b.children ?? []).filter((c) => c.id !== childId),
+          };
+          if (b.type === "itemisation_advanced") {
+            const p = b.properties as import("@/lib/types").ItemisationAdvancedProps;
+            const defaultItems = (p.defaultItems ?? []).map((item) => ({
+              ...item,
+              values: item.values.filter((v) => v.fieldId !== childId),
+            }));
+            updated.properties = { ...p, defaultItems };
+          }
+          return updated;
+        }),
       },
       isDirty: true,
     })),

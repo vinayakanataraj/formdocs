@@ -18,7 +18,7 @@ export function slugify(text: string): string {
 const FIELD_BLOCK_TYPES = new Set([
   "short_text", "long_text", "email", "phone", "number", "currency",
   "date", "single_select", "multi_select", "file_upload", "rating", "yes_no",
-  "itemisation",
+  "itemisation", "itemisation_advanced",
 ]);
 
 /** Ensure every field/itemisation block (and its children) has a non-empty slug. */

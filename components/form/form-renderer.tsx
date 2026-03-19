@@ -160,7 +160,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
             for (const col of cp.columnDefs ?? []) {
               collectSubmissionData(col.blocks);
             }
-          } else if (block.type === "itemisation") {
+          } else if (block.type === "itemisation" || block.type === "itemisation_advanced") {
             itemisations[block.id] = data[block.id] ?? [];
           } else if (data[block.id] !== undefined) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
