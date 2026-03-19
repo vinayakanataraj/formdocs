@@ -30,14 +30,15 @@ export default function ItemisationAdvancedRenderer({ block, allValues }: Props)
   useEffect(() => {
     if (!initialized.current && fields.length === 0 && defaultItems.length > 0) {
       initialized.current = true;
-      for (const item of defaultItems) {
+      const rows = defaultItems.map((item) => {
         const row: Record<string, unknown> = {};
         for (const tf of templateFields) {
           const dv = item.values.find((v) => v.fieldId === tf.id);
           if (dv !== undefined) row[tf.id] = dv.value;
         }
-        append(row);
-      }
+        return row;
+      });
+      append(rows);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
