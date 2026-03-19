@@ -42,3 +42,9 @@ next-env.d.ts
 
 # OMC state (oh-my-claudecode)
 .omc/
+
+#form data
+/data/forms
+
+#buildurnest files
+buildurnest-quotation.md
