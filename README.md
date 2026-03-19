@@ -224,6 +224,133 @@ The editor is a Zustand store (`lib/store/editor.ts`) that holds the entire form
 
 Public forms use React Hook Form with a Zod schema built dynamically from the form's blocks (`lib/validation/form-schema.ts`). Multi-page forms split at `page_break` blocks. On page transition, all field blocks on the current page are validated (not just required ones) before advancing. Autosave to sessionStorage preserves answers across tab refreshes.
 
+## Creating Forms via JSON
+
+Forms are plain JSON files. You can compose them manually and drop them into `data/forms/<slug>.json`, or push them via the API:
+
+```
+PUT /api/forms/<slug>
+Content-Type: application/json
+```
+
+(The API requires an admin session cookie.)
+
+### Top-level structure
+
+```json
+{
+  "meta": { "title": "...", "slug": "my-form", "createdAt": "...", "updatedAt": "..." },
+  "webhook": { "url": "", "method": "POST", "headers": [], "payloadFormat": "json", "retries": 2, "timeoutSeconds": 10 },
+  "blocks": [ ... ]
+}
+```
+
+**`meta` required fields:** `title` (string), `slug` (lowercase alphanumeric + hyphens, e.g. `"contact-us"`), `createdAt` / `updatedAt` (ISO 8601).
+
+**`webhook` required fields:** `url` (empty string if unused), `method` (`"POST"` / `"PUT"` / `"PATCH"`), `headers` (array of `{key, value}`), `payloadFormat` (`"json"` or `"form_urlencoded"`), `retries` (0–3), `timeoutSeconds` (1–60).
+
+### Block shape
+
+```json
+{
+  "id": "any_unique_string",
+  "type": "short_text",
+  "properties": { "label": "Full Name", "slug": "full_name", "required": true },
+  "children": []
+}
+```
+
+`children` is only used by `column_layout` and `itemisation`. IDs can be any unique string.
+
+**The `slug` property on field blocks becomes the key in the webhook payload.**
+
+### Example: Contact form
+
+```json
+{
+  "meta": {
+    "title": "Contact Us",
+    "slug": "contact-us",
+    "description": "We'll get back to you within 24 hours.",
+    "submitButtonText": "Send Message",
+    "successMessage": "Thanks! We'll be in touch.",
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2024-01-15T10:00:00.000Z"
+  },
+  "webhook": {
+    "url": "https://hooks.example.com/contact",
+    "method": "POST",
+    "headers": [{ "key": "Content-Type", "value": "application/json" }],
+    "payloadFormat": "json",
+    "retries": 2,
+    "timeoutSeconds": 10
+  },
+  "blocks": [
+    {
+      "id": "blk_name",
+      "type": "short_text",
+      "properties": { "label": "Full Name", "slug": "full_name", "required": true }
+    },
+    {
+      "id": "blk_email",
+      "type": "email",
+      "properties": { "label": "Email", "slug": "email", "required": true }
+    },
+    {
+      "id": "blk_subject",
+      "type": "single_select",
+      "properties": {
+        "label": "Subject",
+        "slug": "subject",
+        "options": ["General Enquiry", "Support", "Sales"],
+        "display": "dropdown",
+        "required": true
+      }
+    },
+    {
+      "id": "blk_msg",
+      "type": "long_text",
+      "properties": { "label": "Message", "slug": "message", "required": true, "minLength": 20 }
+    }
+  ]
+}
+```
+
+### Quick-reference: all block types
+
+| Category | Type | Key `properties` |
+|---|---|---|
+| Content | `heading1` / `heading2` / `heading3` | `text: string` |
+| Content | `paragraph` | `text: string` |
+| Content | `bulleted_list` / `numbered_list` | `items: string[]` |
+| Content | `quote` | `text: string` |
+| Content | `callout` | `text`, `emoji`, `backgroundColor` |
+| Content | `divider` | _(none)_ |
+| Field | `short_text` | `label`, `slug`, `required`, `minLength`, `maxLength`, `regex` |
+| Field | `long_text` | `label`, `slug`, `required`, `minLength`, `maxLength`, `showCharCounter` |
+| Field | `email` | `label`, `slug`, `required` |
+| Field | `phone` | `label`, `slug`, `required`, `countryCode` |
+| Field | `number` | `label`, `slug`, `required`, `min`, `max`, `step`, `decimalPrecision` |
+| Field | `currency` | `label`, `slug`, `required`, `currencySymbol`, `decimalPlaces` |
+| Field | `date` | `label`, `slug`, `required`, `minDate`, `maxDate`, `dateFormat` |
+| Field | `single_select` | `label`, `slug`, `options: string[]` (**required**), `display: "dropdown"\|"radio"` |
+| Field | `multi_select` | `label`, `slug`, `options: string[]` (**required**), `display: "checkbox"\|"tag"`, `maxSelections` |
+| Field | `file_upload` | `label`, `slug`, `acceptedTypes: string[]`, `maxFileSizeMb` |
+| Field | `rating` | `label`, `slug`, `maxStars` (1–10), `iconStyle: "stars"\|"hearts"\|"thumbs"` |
+| Field | `yes_no` | `label`, `slug`, `defaultState: boolean` |
+| Layout | `column_layout` | `columns: 2\|3` — put field blocks in `children` |
+| Layout | `spacer` | `height: number` (px) |
+| Layout | `page_break` | `label: string` (button text, default `"Next"`) |
+| Special | `itemisation` | `label`, `slug`, `computedFields`, `summaryFields` — field columns go in `children` |
+
+All field blocks also accept `placeholder`, `helpText`, and a `visibilityRule` object (`{ fieldId, operator, value }`).
+
+Default property values are defined in `lib/blocks/defaults.ts`.
+
+### AI-assisted form composition
+
+A Claude skill is available at `skills/formdocs-form-composer/SKILL.md`. Load it to get step-by-step JSON generation with full schema validation, computed field expressions, multi-page examples, and an itemisation invoice example.
+
 ## Block Types
 
 ### Content
