@@ -20,6 +20,7 @@ export default function SingleSelectInput({ block }: { block: Block }) {
                 <input
                   type="radio"
                   value={opt}
+                  defaultChecked={opt === p.defaultValue}
                   {...register(block.id)}
                   className="accent-primary w-4 h-4"
                 />
@@ -35,6 +36,7 @@ export default function SingleSelectInput({ block }: { block: Block }) {
   return (
     <FieldWrapper label={p.label} helpText={p.helpText} required={p.required} error={error}>
       <select
+        defaultValue={p.defaultValue ?? ""}
         {...register(block.id)}
         className={`w-full px-3 py-2.5 text-sm border rounded-lg bg-background focus:outline-none focus:ring-2 transition-colors ${
           error ? "border-destructive focus:ring-destructive/20" : "border-border focus:ring-ring/50"

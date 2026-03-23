@@ -5,14 +5,15 @@ import type { Block, ItemisationProps } from "@/lib/types";
 import FormBlockRenderer from "@/components/form/form-block-renderer";
 import { Plus, Trash2 } from "lucide-react";
 import { useMemo } from "react";
-import { evaluateExpression, buildRowValueMap, computeSummary } from "@/lib/itemisation/expression";
+import { evaluateExpression, buildRowValueMap, computeSummary, extractFormatWrapper, formatComputedValue } from "@/lib/itemisation/expression";
 
 interface Props {
   block: Block;
   allValues: Record<string, unknown>;
+  formBlocks?: Block[];
 }
 
-export default function ItemisationRenderer({ block, allValues }: Props) {
+export default function ItemisationRenderer({ block, allValues, formBlocks = [] }: Props) {
   const p = block.properties as ItemisationProps;
   const templateFields = block.children ?? [];
   const minRows = p.minRows ?? 1;
@@ -97,16 +98,23 @@ export default function ItemisationRenderer({ block, allValues }: Props) {
                         key={templateField.id}
                         block={namespacedBlock}
                         allValues={allValues}
+                        formBlocks={formBlocks}
                       />
                     );
                   })}
 
                   {/* Computed fields for this row */}
                   {(p.computedFields ?? []).map((cf) => {
-                    const val = evaluateExpression(cf.expression, valueMap);
-                    const formatted = cf.format === "currency"
-                      ? `${cf.currencySymbol ?? "$"}${val.toFixed(cf.decimalPlaces ?? 2)}`
-                      : val === 0 ? "—" : val.toFixed(cf.decimalPlaces ?? 2);
+                    const { innerExpr, format: wrapperFormat } = extractFormatWrapper(cf.expression);
+                    const val = evaluateExpression(innerExpr, valueMap);
+                    let formatted: string;
+                    if (cf.format === "currency") {
+                      formatted = `${cf.currencySymbol ?? "$"}${val.toFixed(cf.decimalPlaces ?? 2)}`;
+                    } else if (wrapperFormat) {
+                      formatted = formatComputedValue(val, wrapperFormat, cf.decimalPlaces);
+                    } else {
+                      formatted = val === 0 ? "—" : val.toFixed(cf.decimalPlaces ?? 2);
+                    }
 
                     return (
                       <div key={cf.id} className="space-y-1.5">

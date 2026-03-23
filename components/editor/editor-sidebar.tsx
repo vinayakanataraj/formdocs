@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import type { Block } from "@/lib/types";
+import Link from "next/link";
+import type { Block, ColumnLayoutProps } from "@/lib/types";
 import { useEditorStore } from "@/lib/store/editor";
 import WebhookSettings from "@/components/admin/webhook-settings";
 import FormSettingsPanel from "@/components/admin/form-settings-panel";
 import FieldConfigPanel from "@/components/editor/field-config-panel";
-import { Webhook, Settings, X } from "lucide-react";
+import { Webhook, Settings, X, FileText } from "lucide-react";
 
 type Tab = "webhook" | "settings";
 
@@ -17,6 +18,13 @@ function findBlockById(blocks: Block[], id: string): Block | undefined {
       const found = findBlockById(b.children, id);
       if (found) return found;
     }
+    if (b.type === "column_layout") {
+      const p = b.properties as ColumnLayoutProps;
+      for (const col of p.columnDefs ?? []) {
+        const found = findBlockById(col.blocks, id);
+        if (found) return found;
+      }
+    }
   }
   return undefined;
 }
@@ -26,6 +34,7 @@ export default function EditorSidebar() {
   const setActivePanel = useEditorStore((s) => s.setActivePanel);
   const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
   const blocks = useEditorStore((s) => s.form.blocks);
+  const form = useEditorStore((s) => s.form);
   const [tab, setTab] = useState<Tab>("webhook");
 
   const isOpen = activePanel !== "none";
@@ -64,6 +73,13 @@ export default function EditorSidebar() {
                   <Settings className="w-3.5 h-3.5" />
                   Settings
                 </button>
+                <Link
+                  href={`/admin/forms/${form.meta.slug}/document`}
+                  className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 transition-colors border-b-2 text-muted-foreground hover:text-foreground border-transparent"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  Document
+                </Link>
               </div>
             )}
             {showFieldConfig && (
@@ -81,10 +97,10 @@ export default function EditorSidebar() {
           <div className="flex-1 overflow-y-auto p-4">
             {showFieldConfig && selectedBlock ? (
               <FieldConfigPanel block={selectedBlock} />
-            ) : activePanel === "webhook" || (activePanel !== "settings" && activePanel !== "field-config") ? (
-              <WebhookSettings />
-            ) : (
+            ) : activePanel === "settings" ? (
               <FormSettingsPanel />
+            ) : (
+              <WebhookSettings />
             )}
           </div>
         </>
@@ -107,6 +123,13 @@ export default function EditorSidebar() {
           >
             <Settings className="w-4 h-4" />
           </button>
+          <Link
+            href={`/admin/forms/${form.meta.slug}/document`}
+            title="Document Template"
+            className="flex items-center justify-center w-8 h-8 rounded-l-[3px] border border-r-0 border-border bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <FileText className="w-4 h-4" />
+          </Link>
         </div>
       )}
     </div>

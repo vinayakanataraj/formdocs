@@ -147,6 +147,7 @@ export default function ItemisationAdvancedBlock({ block, onChange, readOnly }: 
               return (
                 <div key={child.id} className="relative group/child">
                   <div
+                    data-child-block-id={child.id}
                     className={`border rounded-[3px] p-2 bg-background cursor-pointer transition-colors ${
                       isChildSelected ? "border-ring ring-1 ring-ring/50" : "border-border hover:border-ring/50"
                     }`}
@@ -155,8 +156,9 @@ export default function ItemisationAdvancedBlock({ block, onChange, readOnly }: 
                       selectBlock(child.id);
                       setActivePanel("field-config");
                     }}
+                    onPointerDown={(e) => e.stopPropagation()}
                   >
-                    <BlockRenderer block={child} readOnly={readOnly} />
+                    <BlockRenderer block={child} readOnly />
                   </div>
                   {!readOnly && (
                     <button
@@ -193,7 +195,9 @@ export default function ItemisationAdvancedBlock({ block, onChange, readOnly }: 
 
       {/* Default Items section */}
       {templateFields.length > 0 && (
-        <div className="px-4 py-3 border-t border-border space-y-2">
+        <div className="px-4 py-3 border-t border-border space-y-2"
+             onClick={(e) => e.stopPropagation()}
+             onPointerDown={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">Default Items</span>
             {!readOnly && (

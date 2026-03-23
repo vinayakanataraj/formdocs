@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { nanoid } from "nanoid";
-import type { Block, BlockType, Form, FormMeta, WebhookConfig, ColumnLayoutProps } from "@/lib/types";
+import type { Block, BlockType, Form, FormMeta, WebhookConfig, ColumnLayoutProps, DocumentTemplate } from "@/lib/types";
 import { createBlock } from "@/lib/blocks/defaults";
 import { createDefaultForm } from "@/lib/form-defaults";
 import { ensureBlockSlugs } from "@/lib/utils";
@@ -16,7 +16,7 @@ export type ContainerLocation =
 
 // ─── Store Interface ───────────────────────────────────────────────────────────
 
-export type EditorPanel = "none" | "webhook" | "settings" | "field-config";
+export type EditorPanel = "none" | "webhook" | "settings" | "field-config" | "document";
 
 interface EditorStore {
   form: Form;
@@ -32,6 +32,7 @@ interface EditorStore {
   initForm: (form: Form) => void;
   updateMeta: (meta: Partial<FormMeta>) => void;
   updateWebhook: (webhook: Partial<WebhookConfig>) => void;
+  updateDocumentTemplate: (template: Partial<DocumentTemplate>) => void;
   markSaved: () => void;
   setIsSaving: (value: boolean) => void;
 
@@ -114,6 +115,18 @@ function insertAfter(blocks: Block[], afterId: string | null | undefined, newBlo
   return result;
 }
 
+function createDefaultDocumentTemplate(): DocumentTemplate {
+  return {
+    enabled: false,
+    markdown: "",
+    branding: {
+      companyName: "",
+      currencySymbol: "₹",
+      numberFormat: "indian",
+    },
+  };
+}
+
 // ─── Store ─────────────────────────────────────────────────────────────────────
 
 export const useEditorStore = create<EditorStore>((set) => ({
@@ -145,8 +158,25 @@ export const useEditorStore = create<EditorStore>((set) => ({
         }
         return b;
       });
+    // Migrate old documentTemplate format (headerMarkdown/footerMarkdown → markdown)
+    let migratedDoc = form.documentTemplate;
+    if (migratedDoc && "headerMarkdown" in migratedDoc) {
+      const old = migratedDoc as Record<string, unknown>;
+      const header = (old.headerMarkdown as string) ?? "";
+      const footer = (old.footerMarkdown as string) ?? "";
+      const oldBranding = (old.branding as Record<string, unknown>) ?? {};
+      migratedDoc = {
+        enabled: (old.enabled as boolean) ?? false,
+        markdown: [header, footer].filter(Boolean).join("\n\n"),
+        branding: {
+          companyName: (oldBranding.companyName as string) ?? "",
+          currencySymbol: (oldBranding.currencySymbol as string) ?? "₹",
+          numberFormat: ((oldBranding.numberFormat as string) ?? "indian") as "indian" | "international",
+        },
+      };
+    }
     set({
-      form: { ...form, blocks: ensureBlockSlugs(migrateBlocks(form.blocks)) },
+      form: { ...form, blocks: ensureBlockSlugs(migrateBlocks(form.blocks)), documentTemplate: migratedDoc },
       isDirty: false,
     });
   },
@@ -160,6 +190,18 @@ export const useEditorStore = create<EditorStore>((set) => ({
   updateWebhook: (webhook) =>
     set((s) => ({
       form: { ...s.form, webhook: { ...s.form.webhook, ...webhook } },
+      isDirty: true,
+    })),
+
+  updateDocumentTemplate: (template) =>
+    set((s) => ({
+      form: {
+        ...s.form,
+        documentTemplate: {
+          ...(s.form.documentTemplate ?? createDefaultDocumentTemplate()),
+          ...template,
+        },
+      },
       isDirty: true,
     })),
 

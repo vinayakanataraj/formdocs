@@ -1,9 +1,11 @@
 "use client";
 
-import type { Block } from "@/lib/types";
+import { useMemo } from "react";
+import type { Block, ColumnLayoutProps } from "@/lib/types";
 import { useEditorStore } from "@/lib/store/editor";
 import { slugify } from "@/lib/utils";
 import { Plus, Trash2 } from "lucide-react";
+import ExpressionInput from "@/components/editor/expression-input";
 
 interface Props { block: Block; }
 
@@ -52,7 +54,7 @@ export default function FieldConfigPanel({ block }: Props) {
   }
 
   const isField = ["short_text", "long_text", "email", "phone", "number", "currency",
-    "date", "single_select", "multi_select", "file_upload", "rating", "yes_no", "itemisation", "itemisation_advanced"].includes(block.type);
+    "date", "single_select", "multi_select", "file_upload", "rating", "yes_no", "hidden", "itemisation", "itemisation_advanced"].includes(block.type);
 
   if (!isField) return <p className="text-xs text-muted-foreground">No configuration for this block type.</p>;
 
@@ -102,13 +104,13 @@ export default function FieldConfigPanel({ block }: Props) {
         <p className="text-[10px] text-muted-foreground mt-0.5">Used as the key in webhook JSON output.</p>
       </Row>
 
-      {block.type !== "divider" && block.type !== "yes_no" && block.type !== "rating" && block.type !== "itemisation" && block.type !== "itemisation_advanced" && (
+      {block.type !== "divider" && block.type !== "yes_no" && block.type !== "rating" && block.type !== "hidden" && block.type !== "itemisation" && block.type !== "itemisation_advanced" && (
         <Row label="Placeholder">
           <TextInput value={p.placeholder} onChange={(v) => update({ placeholder: v })} placeholder="Placeholder text" />
         </Row>
       )}
 
-      {block.type !== "itemisation" && block.type !== "itemisation_advanced" && (
+      {block.type !== "itemisation" && block.type !== "itemisation_advanced" && block.type !== "hidden" && (
         <>
           <Toggle value={p.required} onChange={(v) => update({ required: v })} label="Required" />
 
@@ -219,6 +221,20 @@ export default function FieldConfigPanel({ block }: Props) {
               )}
             </select>
           </Row>
+          {block.type === "single_select" && (p.options ?? []).length > 0 && (
+            <Row label="Default Value">
+              <select
+                value={p.defaultValue ?? ""}
+                onChange={(e) => update({ defaultValue: e.target.value || undefined })}
+                className="w-full px-2.5 py-1.5 text-xs border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="">None (show placeholder)</option>
+                {(p.options ?? []).map((opt: string, i: number) => (
+                  <option key={i} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </Row>
+          )}
         </div>
       )}
 
@@ -254,6 +270,184 @@ export default function FieldConfigPanel({ block }: Props) {
           </Row>
         </>
       )}
+
+      {block.type === "hidden" && (
+        <HiddenFieldConfig block={block} update={update} p={p} />
+      )}
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Hidden Field Config — Static vs Formula mode                       */
+/* ------------------------------------------------------------------ */
+
+const FIELD_TYPES = new Set([
+  "short_text", "long_text", "email", "phone", "number", "currency",
+  "date", "single_select", "multi_select", "file_upload", "rating", "yes_no", "hidden",
+]);
+
+function collectFieldLabels(blocks: Block[], excludeId: string): string[] {
+  const labels: string[] = [];
+  for (const b of blocks) {
+    if (b.id === excludeId) continue;
+    if (FIELD_TYPES.has(b.type)) {
+      const label = (b.properties as { label?: string })?.label;
+      if (label) labels.push(label);
+    } else if (b.type === "column_layout") {
+      const cols = (b.properties as ColumnLayoutProps).columnDefs ?? [];
+      for (const col of cols) {
+        for (const child of col.blocks) {
+          if (child.id === excludeId) continue;
+          if (FIELD_TYPES.has(child.type)) {
+            const label = (child.properties as { label?: string })?.label;
+            if (label) labels.push(label);
+          }
+        }
+      }
+    } else if ((b.type === "itemisation" || b.type === "itemisation_advanced") && b.children) {
+      // Check if the hidden field is a child of this itemisation
+      const isChild = b.children.some(c => c.id === excludeId);
+      if (isChild) {
+        // Only offer sibling labels within this itemisation
+        for (const child of b.children) {
+          if (child.id === excludeId) continue;
+          const label = (child.properties as { label?: string })?.label;
+          if (label) labels.push(label);
+        }
+      }
+    }
+  }
+  return labels;
+}
+
+function findParentItemisation(blocks: Block[], blockId: string): Block | null {
+  for (const b of blocks) {
+    if ((b.type === "itemisation" || b.type === "itemisation_advanced") && b.children) {
+      if (b.children.some(c => c.id === blockId)) return b;
+    }
+  }
+  return null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function HiddenFieldConfig({ block, update, p }: { block: Block; update: (partial: Record<string, unknown>) => void; p: any }) {
+  const allBlocks = useEditorStore((s) => s.form.blocks);
+  const isFormula = p.expression !== undefined;
+
+  const parentItemisation = useMemo(
+    () => findParentItemisation(allBlocks, block.id),
+    [allBlocks, block.id]
+  );
+
+  const availableLabels = useMemo(() => {
+    if (parentItemisation) {
+      // Inside itemisation: only sibling children labels
+      return (parentItemisation.children ?? [])
+        .filter(c => c.id !== block.id)
+        .map(c => (c.properties as { label?: string })?.label)
+        .filter((l): l is string => !!l);
+    }
+    return collectFieldLabels(allBlocks, block.id);
+  }, [allBlocks, block.id, parentItemisation]);
+
+  // Itemisation labels for ITEM_* autocomplete (only for top-level hidden fields)
+  const itemisationLabels = useMemo(() => {
+    if (parentItemisation) return undefined;
+    return allBlocks
+      .filter(b => b.type === "itemisation" || b.type === "itemisation_advanced")
+      .map(b => (b.properties as { label?: string })?.label)
+      .filter((l): l is string => !!l);
+  }, [allBlocks, parentItemisation]);
+
+  const itemisationChildLabels = useMemo(() => {
+    if (parentItemisation) return undefined;
+    const map: Record<string, string[]> = {};
+    for (const b of allBlocks) {
+      if (b.type !== "itemisation" && b.type !== "itemisation_advanced") continue;
+      const label = (b.properties as { label?: string })?.label;
+      if (!label) continue;
+      map[label] = (b.children ?? [])
+        .map(c => (c.properties as { label?: string })?.label)
+        .filter((l): l is string => !!l);
+    }
+    return map;
+  }, [allBlocks, parentItemisation]);
+
+  return (
+    <>
+      <Row label="Mode">
+        <select
+          value={isFormula ? "formula" : "static"}
+          onChange={(e) => {
+            if (e.target.value === "formula") {
+              update({ expression: "", defaultValue: undefined, queryParam: undefined });
+            } else {
+              update({ expression: undefined, format: undefined, currencySymbol: undefined, decimalPlaces: undefined });
+            }
+          }}
+          className="w-full px-2.5 py-1.5 text-xs border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+        >
+          <option value="static">Static</option>
+          <option value="formula">Formula</option>
+        </select>
+      </Row>
+
+      {!isFormula ? (
+        <>
+          <Row label="Default Value">
+            <TextInput value={p.defaultValue} onChange={(v) => update({ defaultValue: v })} placeholder="Static value" />
+          </Row>
+          <Row label="Query Parameter">
+            <TextInput value={p.queryParam} onChange={(v) => update({ queryParam: v })} placeholder="e.g. utm_source" />
+            <p className="text-[10px] text-muted-foreground mt-0.5">Reads value from URL query string. Overrides default value when present.</p>
+          </Row>
+        </>
+      ) : (
+        <>
+          <Row label="Expression">
+            <ExpressionInput
+              value={p.expression ?? ""}
+              onChange={(v) => update({ expression: v })}
+              allColumnLabels={availableLabels}
+              placeholder="{Price} * 1.18"
+              itemisationLabels={itemisationLabels}
+              itemisationChildLabels={itemisationChildLabels}
+            />
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              Use {"{Field Label}"} to reference fields. Type {"{"} for autocomplete.
+            </p>
+          </Row>
+          <Row label="Format">
+            <select
+              value={p.format ?? ""}
+              onChange={(e) => update({ format: e.target.value || undefined })}
+              className="w-full px-2.5 py-1.5 text-xs border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              <option value="">None</option>
+              <option value="number">Number</option>
+              <option value="currency">Currency</option>
+            </select>
+          </Row>
+          {p.format === "currency" && (
+            <Row label="Currency Symbol">
+              <TextInput value={p.currencySymbol} onChange={(v) => update({ currencySymbol: v })} placeholder="$" />
+            </Row>
+          )}
+          {(p.format === "number" || p.format === "currency") && (
+            <Row label="Decimal Places">
+              <input
+                type="number"
+                min={0}
+                max={10}
+                value={p.decimalPlaces ?? 2}
+                onChange={(e) => update({ decimalPlaces: parseInt(e.target.value) || 2 })}
+                className="w-full px-2.5 py-1.5 text-xs border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </Row>
+          )}
+        </>
+      )}
+    </>
   );
 }

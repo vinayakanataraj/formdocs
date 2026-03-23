@@ -257,7 +257,7 @@ export default function FormRenderer({ form }: FormRendererProps) {
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
         {/* Render current page's blocks */}
         {pages[currentPage]?.map((block) => (
-          <FormBlockRenderer key={block.id} block={block} allValues={values} />
+          <FormBlockRenderer key={block.id} block={block} allValues={values} formBlocks={form.blocks} />
         ))}
 
         {/* Error message */}

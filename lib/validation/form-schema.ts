@@ -110,6 +110,11 @@ function addBlockToSchema(shape: Record<string, z.ZodTypeAny>, block: Block) {
       break;
     }
 
+    case "hidden": {
+      shape[block.id] = z.string().optional();
+      break;
+    }
+
     case "file_upload": {
       const maxBytes = (p.maxFileSizeMb ?? 10) * 1024 * 1024;
       const acceptedTypes: string[] = p.acceptedTypes ?? [];

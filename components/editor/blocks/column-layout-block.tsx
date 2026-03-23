@@ -24,6 +24,7 @@ function ColumnArea({
   const openSlashCommand = useEditorStore((s) => s.openSlashCommand);
   const deleteBlockFromColumn = useEditorStore((s) => s.deleteBlockFromColumn);
   const selectBlock = useEditorStore((s) => s.selectBlock);
+  const setActivePanel = useEditorStore((s) => s.setActivePanel);
   const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
   const droppableId = `column:${layoutId}:${columnIndex}`;
   const { setNodeRef, isOver } = useDroppable({
@@ -48,7 +49,19 @@ function ColumnArea({
               className={`relative group/colblock rounded border transition-colors ${
                 isSelected ? "border-primary/50 bg-primary/5" : "border-transparent hover:border-border"
               }`}
-              onClick={(e) => { e.stopPropagation(); selectBlock(child.id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                const childEl = (e.target as HTMLElement).closest('[data-child-block-id]');
+                if (childEl) {
+                  const childId = childEl.getAttribute('data-child-block-id');
+                  if (childId) {
+                    selectBlock(childId);
+                    setActivePanel("field-config");
+                    return;
+                  }
+                }
+                selectBlock(child.id);
+              }}
             >
               {!readOnly && (
                 <button

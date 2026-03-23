@@ -23,7 +23,8 @@ export type FieldBlockType =
   | "multi_select"
   | "file_upload"
   | "rating"
-  | "yes_no";
+  | "yes_no"
+  | "hidden";
 
 export type LayoutBlockType = "column_layout" | "spacer" | "page_break";
 
@@ -92,6 +93,7 @@ export interface DateProps extends BaseBlockProps {
 export interface SingleSelectProps extends BaseBlockProps {
   options: string[];
   display?: "dropdown" | "radio";
+  defaultValue?: string;
 }
 
 export interface MultiSelectProps extends BaseBlockProps {
@@ -112,6 +114,15 @@ export interface RatingProps extends BaseBlockProps {
 
 export interface YesNoProps extends BaseBlockProps {
   defaultState?: boolean;
+}
+
+export interface HiddenProps extends BaseBlockProps {
+  defaultValue?: string;
+  queryParam?: string;
+  expression?: string;          // e.g. "{Quantity} * {Unit Price}"
+  format?: "number" | "currency";
+  currencySymbol?: string;
+  decimalPlaces?: number;
 }
 
 export interface HeadingProps {
@@ -218,6 +229,7 @@ export type BlockProperties =
   | FileUploadProps
   | RatingProps
   | YesNoProps
+  | HiddenProps
   | HeadingProps
   | ParagraphProps
   | BulletedListProps
@@ -247,6 +259,31 @@ export interface WebhookHeader {
   value: string;
 }
 
+export interface ItemisationTableColumn {
+  id: string;              // child block ID or computed field ID
+  label: string;           // column header text
+  type: "field" | "computed";
+  visible: boolean;
+}
+
+export interface ItemisationTableStyle {
+  headerBgColor: string;        // default "#f2f2f2"
+  headerFontBold: boolean;      // default true
+  headerFontItalic: boolean;
+  headerFontUnderline: boolean;
+  bodyBgColor: string;          // default "#ffffff"
+  bodyFontBold: boolean;
+  bodyFontItalic: boolean;
+  bodyFontUnderline: boolean;
+}
+
+export interface ItemisationTableConfig {
+  blockId: string;
+  columns: ItemisationTableColumn[];  // order = array position
+  style: ItemisationTableStyle;
+  includeSummaryFooter: boolean;
+}
+
 export interface WebhookConfig {
   url: string;
   method: "POST" | "PUT" | "PATCH";
@@ -255,6 +292,9 @@ export interface WebhookConfig {
   retries: number; // 0–3
   timeoutSeconds: number;
   waitForResponse?: boolean;
+  payloadContent?: "both" | "response_only" | "document_only"; // default "both"
+  itemisationAsTable?: boolean;
+  itemisationTableConfigs?: ItemisationTableConfig[];
 }
 
 // ─── Form Meta ─────────────────────────────────────────────────────────────────
@@ -275,12 +315,25 @@ export interface FormMeta {
   updatedAt: string; // ISO 8601
 }
 
+// ─── Document Template ─────────────────────────────────────────────────────────
+
+export interface DocumentTemplate {
+  enabled: boolean;
+  markdown: string;
+  branding: {
+    companyName: string;
+    currencySymbol: string;
+    numberFormat: "international" | "indian";
+  };
+}
+
 // ─── Form (the full JSON file) ─────────────────────────────────────────────────
 
 export interface Form {
   meta: FormMeta;
   webhook: WebhookConfig;
   blocks: Block[];
+  documentTemplate?: DocumentTemplate;
 }
 
 // ─── Webhook Payload (sent on submission) ─────────────────────────────────────
@@ -294,6 +347,10 @@ export interface WebhookPayload {
     ip?: string;
   };
   data: Record<string, unknown>;
+  document?: {
+    markdown: string;
+    generatedAt: string;
+  };
 }
 
 // ─── Editor Block Props ────────────────────────────────────────────────────────

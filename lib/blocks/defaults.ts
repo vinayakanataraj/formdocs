@@ -29,6 +29,7 @@ export function createBlock(type: BlockType, overrides: Partial<Block> = {}): Bl
     file_upload: { label: "File Upload", slug: "file_upload", required: false, acceptedTypes: [], maxFileSizeMb: 10 },
     rating: { label: "Rating", slug: "rating", required: false, maxStars: 5, iconStyle: "stars" },
     yes_no: { label: "Yes / No", slug: "yes_no", required: false, defaultState: false },
+    hidden: { label: "Hidden Field", slug: "hidden", required: false, defaultValue: "", queryParam: "" },
 
     // Layout
     column_layout: {

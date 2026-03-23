@@ -15,6 +15,7 @@ interface SortableBlockProps {
 export default function SortableBlock({ block }: SortableBlockProps) {
   const selectedBlockId = useEditorStore((s) => s.selectedBlockId);
   const selectBlock = useEditorStore((s) => s.selectBlock);
+  const setActivePanel = useEditorStore((s) => s.setActivePanel);
   const openSlashCommand = useEditorStore((s) => s.openSlashCommand);
   const isSelected = selectedBlockId === block.id;
 
@@ -32,7 +33,18 @@ export default function SortableBlock({ block }: SortableBlockProps) {
       ref={setNodeRef}
       style={{ ...style, paddingLeft: "2rem" }}
       className="group relative py-0.5"
-      onClick={() => selectBlock(block.id)}
+      onClick={(e) => {
+        const childEl = (e.target as HTMLElement).closest('[data-child-block-id]');
+        if (childEl) {
+          const childId = childEl.getAttribute('data-child-block-id');
+          if (childId) {
+            selectBlock(childId);
+            setActivePanel("field-config");
+            return;
+          }
+        }
+        selectBlock(block.id);
+      }}
     >
       {/* Left gutter — appears on hover */}
       <div className="absolute left-0 top-0.5 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">

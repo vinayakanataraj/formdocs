@@ -15,12 +15,14 @@ import MultiSelectInput from "@/components/form/fields/multi-select-input";
 import FileUploadInput from "@/components/form/fields/file-upload-input";
 import RatingInput from "@/components/form/fields/rating-input";
 import YesNoInput from "@/components/form/fields/yes-no-input";
+import HiddenInput from "@/components/form/fields/hidden-input";
 import ItemisationRenderer from "@/components/form/itemisation-renderer";
 import ItemisationAdvancedRenderer from "@/components/form/itemisation-advanced-renderer";
 
 interface Props {
   block: Block;
   allValues: Record<string, unknown>;
+  formBlocks?: Block[];
 }
 
 // Evaluate a visibility rule
@@ -39,7 +41,7 @@ function isVisible(block: Block, values: Record<string, unknown>): boolean {
   }
 }
 
-export default function FormBlockRenderer({ block, allValues }: Props) {
+export default function FormBlockRenderer({ block, allValues, formBlocks = [] }: Props) {
   if (!isVisible(block, allValues)) return null;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,7 +82,7 @@ export default function FormBlockRenderer({ block, allValues }: Props) {
               style={{ gridColumn: `span ${col.span} / span ${col.span}` }}
             >
               {col.blocks.map((child) => (
-                <FormBlockRenderer key={child.id} block={child} allValues={allValues} />
+                <FormBlockRenderer key={child.id} block={child} allValues={allValues} formBlocks={formBlocks} />
               ))}
             </div>
           ))}
@@ -101,8 +103,9 @@ export default function FormBlockRenderer({ block, allValues }: Props) {
     case "file_upload": return <FileUploadInput block={block} />;
     case "rating": return <RatingInput block={block} />;
     case "yes_no": return <YesNoInput block={block} />;
-    case "itemisation": return <ItemisationRenderer block={block} allValues={allValues} />;
-    case "itemisation_advanced": return <ItemisationAdvancedRenderer block={block} allValues={allValues} />;
+    case "hidden": return <HiddenInput block={block} allValues={allValues} formBlocks={formBlocks} />;
+    case "itemisation": return <ItemisationRenderer block={block} allValues={allValues} formBlocks={formBlocks} />;
+    case "itemisation_advanced": return <ItemisationAdvancedRenderer block={block} allValues={allValues} formBlocks={formBlocks} />;
 
     default:
       return null;

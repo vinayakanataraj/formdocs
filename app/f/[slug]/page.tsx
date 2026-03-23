@@ -46,7 +46,7 @@ export default async function PublicFormPage({ params }: Props) {
         </div>
       )}
 
-      <div className="max-w-[720px] mx-auto px-6 py-12 md:px-16 lg:px-24">
+      <div className="max-w-[960px] mx-auto px-6 py-12 md:px-16 lg:px-24">
         {/* Logo */}
         {form.meta.logoUrl && (
           <div className="mb-6">

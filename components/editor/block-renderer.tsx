@@ -24,6 +24,7 @@ import MultiSelectField from "@/components/editor/blocks/multi-select-block";
 import FileUploadField from "@/components/editor/blocks/file-upload-block";
 import RatingField from "@/components/editor/blocks/rating-block";
 import YesNoField from "@/components/editor/blocks/yes-no-block";
+import HiddenField from "@/components/editor/blocks/hidden-block";
 
 // Layout blocks
 import ColumnLayoutBlock from "@/components/editor/blocks/column-layout-block";
@@ -89,6 +90,8 @@ export default function BlockRenderer({ block, readOnly = false }: BlockRenderer
       return <RatingField block={block} onChange={onChange} readOnly={readOnly} />;
     case "yes_no":
       return <YesNoField block={block} onChange={onChange} readOnly={readOnly} />;
+    case "hidden":
+      return <HiddenField block={block} onChange={onChange} readOnly={readOnly} />;
 
     // Layout
     case "column_layout":

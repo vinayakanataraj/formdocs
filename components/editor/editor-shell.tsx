@@ -79,7 +79,7 @@ export default function EditorShell({ initialForm }: EditorShellProps) {
       <div className="flex flex-1 overflow-hidden">
         {/* Main canvas */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-[720px] mx-auto px-6 py-12 md:px-16 lg:px-24">
+          <div className="max-w-[960px] mx-auto px-6 py-12 md:px-16 lg:px-24">
             {/* Form title */}
             <input
               type="text"

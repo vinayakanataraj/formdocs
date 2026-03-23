@@ -27,6 +27,7 @@ export function createDefaultForm(slug: string, title: string = ""): Form {
       retries: 2,
       timeoutSeconds: 10,
       waitForResponse: false,
+      payloadContent: "both",
     },
     blocks: [],
   };

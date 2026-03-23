@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useEditorStore } from "@/lib/store/editor";
 import { Plus, Trash2, Loader2, CheckCircle, XCircle } from "lucide-react";
+import WebhookTableConfig from "@/components/admin/webhook-table-config";
 
 const PRESETS = [
   {
@@ -168,6 +169,23 @@ export default function WebhookSettings() {
         </div>
       </div>
 
+      {/* Payload Content */}
+      <div className="space-y-1.5">
+        <label className="text-xs font-medium">Payload Content</label>
+        <select
+          value={wh.payloadContent ?? "both"}
+          onChange={(e) => updateWebhook({ payloadContent: e.target.value as "both" | "response_only" | "document_only" })}
+          className="w-full px-3 py-2 text-xs border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+        >
+          <option value="both">Both (form response + document)</option>
+          <option value="response_only">Form response only</option>
+          <option value="document_only">Document only</option>
+        </select>
+        <p className="text-xs text-muted-foreground">
+          &quot;Document only&quot; and &quot;Both&quot; require document generation to be enabled on the form.
+        </p>
+      </div>
+
       {/* Retry / Timeout */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
@@ -208,6 +226,23 @@ export default function WebhookSettings() {
         <p className="text-xs text-muted-foreground">
           Display the webhook&apos;s response on the thank you screen after submission.
         </p>
+      </div>
+
+      {/* Itemisation as HTML table */}
+      <div className="space-y-2">
+        <label className="flex items-center gap-2 text-xs cursor-pointer">
+          <input
+            type="checkbox"
+            checked={wh.itemisationAsTable ?? false}
+            onChange={(e) => updateWebhook({ itemisationAsTable: e.target.checked })}
+            className="accent-primary"
+          />
+          <span className="font-medium">Send itemisation data as HTML table</span>
+        </label>
+        <p className="text-xs text-muted-foreground">
+          Replace itemisation arrays with formatted HTML tables in the webhook payload — ready for emails or rich-text destinations.
+        </p>
+        {wh.itemisationAsTable && <WebhookTableConfig />}
       </div>
 
       {/* Test button */}

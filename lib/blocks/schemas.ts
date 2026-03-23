@@ -66,6 +66,7 @@ export const singleSelectPropsSchema = z.object({
   ...baseFieldProps,
   options: z.array(z.string()),
   display: z.enum(["dropdown", "radio"]).optional(),
+  defaultValue: z.string().optional(),
 });
 
 export const multiSelectPropsSchema = z.object({
@@ -90,6 +91,16 @@ export const ratingPropsSchema = z.object({
 export const yesNoPropsSchema = z.object({
   ...baseFieldProps,
   defaultState: z.boolean().optional(),
+});
+
+export const hiddenPropsSchema = z.object({
+  ...baseFieldProps,
+  defaultValue: z.string().optional(),
+  queryParam: z.string().optional(),
+  expression: z.string().optional(),
+  format: z.enum(["number", "currency"]).optional(),
+  currencySymbol: z.string().optional(),
+  decimalPlaces: z.number().optional(),
 });
 
 export const headingPropsSchema = z.object({ text: z.string().optional() });
@@ -164,7 +175,7 @@ export const blockSchema: z.ZodType<any> = z.lazy(() =>
       "heading1", "heading2", "heading3", "paragraph",
       "bulleted_list", "numbered_list", "quote", "callout", "divider",
       "short_text", "long_text", "email", "phone", "number", "currency",
-      "date", "single_select", "multi_select", "file_upload", "rating", "yes_no",
+      "date", "single_select", "multi_select", "file_upload", "rating", "yes_no", "hidden",
       "column_layout", "spacer", "page_break", "itemisation", "itemisation_advanced",
     ]),
     properties: z.record(z.string(), z.unknown()),
@@ -179,6 +190,31 @@ export const webhookHeaderSchema = z.object({
   value: z.string(),
 });
 
+const itemisationTableColumnSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  type: z.enum(["field", "computed"]),
+  visible: z.boolean(),
+});
+
+const itemisationTableStyleSchema = z.object({
+  headerBgColor: z.string(),
+  headerFontBold: z.boolean(),
+  headerFontItalic: z.boolean(),
+  headerFontUnderline: z.boolean(),
+  bodyBgColor: z.string(),
+  bodyFontBold: z.boolean(),
+  bodyFontItalic: z.boolean(),
+  bodyFontUnderline: z.boolean(),
+});
+
+const itemisationTableConfigSchema = z.object({
+  blockId: z.string(),
+  columns: z.array(itemisationTableColumnSchema),
+  style: itemisationTableStyleSchema,
+  includeSummaryFooter: z.boolean(),
+});
+
 export const webhookConfigSchema = z.object({
   url: z.string().url().or(z.literal("")),
   method: z.enum(["POST", "PUT", "PATCH"]),
@@ -187,6 +223,9 @@ export const webhookConfigSchema = z.object({
   retries: z.number().min(0).max(3),
   timeoutSeconds: z.number().min(1).max(60),
   waitForResponse: z.boolean().optional(),
+  payloadContent: z.enum(["both", "response_only", "document_only"]).optional(),
+  itemisationAsTable: z.boolean().optional(),
+  itemisationTableConfigs: z.array(itemisationTableConfigSchema).optional(),
 });
 
 // ─── Form Meta Schema ──────────────────────────────────────────────────────────
@@ -207,12 +246,25 @@ export const formMetaSchema = z.object({
   updatedAt: z.string(),
 });
 
+// ─── Document Template Schema ──────────────────────────────────────────────────
+
+export const documentTemplateSchema = z.object({
+  enabled: z.boolean(),
+  markdown: z.string(),
+  branding: z.object({
+    companyName: z.string(),
+    currencySymbol: z.string(),
+    numberFormat: z.enum(["international", "indian"]),
+  }),
+});
+
 // ─── Full Form Schema ──────────────────────────────────────────────────────────
 
 export const formSchema = z.object({
   meta: formMetaSchema,
   webhook: webhookConfigSchema,
   blocks: z.array(blockSchema),
+  documentTemplate: documentTemplateSchema.optional(),
 });
 
 export type FormSchemaType = z.infer<typeof formSchema>;

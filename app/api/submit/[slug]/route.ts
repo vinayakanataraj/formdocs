@@ -3,7 +3,9 @@ import { getForm } from "@/lib/forms";
 import { isAdminRequestValid } from "@/lib/auth";
 import { buildSubmissionSchema } from "@/lib/validation/form-schema";
 import { slugify, ensureBlockSlugs } from "@/lib/utils";
-import type { WebhookPayload, WebhookHeader, Block } from "@/lib/types";
+import type { WebhookPayload, WebhookHeader, Block, Form } from "@/lib/types";
+import { generateDocument } from "@/lib/document/generate";
+import { buildItemisationHtmlTable, findBlockById } from "@/lib/webhook/html-table";
 import fs from "fs";
 import path from "path";
 
@@ -172,6 +174,19 @@ async function sendWithRetry(
   throw lastError ?? new Error("Webhook request failed");
 }
 
+// ─── Document generation ───────────────────────────────────────────────────────
+
+function buildDocumentPayload(form: Form, data: Record<string, unknown>): WebhookPayload["document"] | undefined {
+  if (!form.documentTemplate?.enabled) return undefined;
+  try {
+    const doc = generateDocument({ form, submissionData: data });
+    return { markdown: doc.markdown, generatedAt: doc.metadata.generatedAt };
+  } catch (err) {
+    console.error("Document generation failed:", err);
+    return undefined;
+  }
+}
+
 // ─── POST: public form submission ─────────────────────────────────────────────
 
 export async function POST(req: NextRequest, { params }: Params) {
@@ -243,6 +258,18 @@ export async function POST(req: NextRequest, { params }: Params) {
       });
     }
 
+    // Convert itemisation data to HTML tables if configured
+    if (form.webhook.itemisationAsTable && form.webhook.itemisationTableConfigs?.length) {
+      for (const tc of form.webhook.itemisationTableConfigs) {
+        const slug = itemSlugs.get(tc.blockId) ?? tc.blockId;
+        const rawRows = data[slug];
+        if (!Array.isArray(rawRows)) continue;
+        const block = findBlockById(normalizedBlocks, tc.blockId);
+        if (!block) continue;
+        data[slug] = buildItemisationHtmlTable(rawRows as Record<string, unknown>[], block, tc);
+      }
+    }
+
     const payload: WebhookPayload = {
       meta: {
         slug: form.meta.slug,
@@ -252,7 +279,16 @@ export async function POST(req: NextRequest, { params }: Params) {
         ip: req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? undefined,
       },
       data,
+      document: buildDocumentPayload(form, data),
     };
+
+    // Filter payload based on payloadContent setting
+    const pc = form.webhook.payloadContent;
+    if (pc === "response_only") {
+      payload.document = undefined;
+    } else if (pc === "document_only") {
+      payload.data = {};
+    }
 
     const headers = buildHeaders(form.webhook.headers);
 
@@ -366,6 +402,18 @@ export async function PUT(req: NextRequest, { params }: Params) {
   }
   collectSampleData(normalizedBlocks);
 
+  // Convert itemisation sample data to HTML tables if configured
+  if (form.webhook.itemisationAsTable && form.webhook.itemisationTableConfigs?.length) {
+    for (const tc of form.webhook.itemisationTableConfigs) {
+      const slug = itemSlugs.get(tc.blockId) ?? tc.blockId;
+      const rawRows = sampleData[slug];
+      if (!Array.isArray(rawRows)) continue;
+      const block = findBlockById(normalizedBlocks, tc.blockId);
+      if (!block) continue;
+      sampleData[slug] = buildItemisationHtmlTable(rawRows as Record<string, unknown>[], block, tc);
+    }
+  }
+
   const samplePayload: WebhookPayload = {
     meta: {
       slug: form.meta.slug,
@@ -375,6 +423,14 @@ export async function PUT(req: NextRequest, { params }: Params) {
     },
     data: sampleData,
   };
+
+  // Filter payload based on payloadContent setting
+  const pc = form.webhook.payloadContent;
+  if (pc === "response_only") {
+    samplePayload.document = undefined;
+  } else if (pc === "document_only") {
+    samplePayload.data = {};
+  }
 
   const headers = buildHeaders(form.webhook.headers);
   headers["Content-Type"] = "application/json";

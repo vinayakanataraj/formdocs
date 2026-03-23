@@ -469,6 +469,326 @@ npm run lint
 - For new block types, include both the editor config panel and the respondent renderer
 - Security-sensitive changes (auth, webhook proxy, file I/O) will receive extra scrutiny
 
+## Expression Engine & Formulas
+
+Formdocs includes a built-in expression engine powered by [expr-eval](https://github.com/nicolewhite/expr-eval). It lets you define calculated fields that update in real time as respondents fill out the form.
+
+### Field Reference Syntax
+
+Expressions reference other fields by label using curly braces:
+
+```
+{Quantity} * {Unit Price}
+```
+
+- Labels are **case-sensitive** and must match the block's `label` property exactly.
+- If a referenced field is missing, empty, or non-numeric, it defaults to `0`.
+- If the entire expression errors (syntax error, division by zero, etc.), it silently returns `0`.
+
+### Operators
+
+| Operator | Description | Example |
+|---|---|---|
+| `+` `-` `*` `/` | Basic arithmetic | `{Price} * 1.18` |
+| `%` | Modulo | `{Total} % 100` |
+| `^` | Exponentiation | `{Base} ^ 2` |
+| `>` `<` `>=` `<=` | Comparison (returns 1 or 0) | `{Qty} > 10` |
+| `==` `!=` | Equality | `{Type} == 1` |
+
+### Function Reference
+
+All 18 built-in functions. Function names are case-insensitive — `ABS`, `abs`, and `Abs` all work.
+
+#### Math
+
+| Function | Args | Description |
+|---|---|---|
+| `ABS(x)` | 1 | Absolute value |
+| `SQRT(x)` | 1 | Square root |
+| `SIGN(x)` | 1 | Returns −1, 0, or 1 |
+| `LOG(x)` | 1 | Natural logarithm (ln) |
+| `EXP(x)` | 1 | Euler's number raised to x (e^x) |
+
+#### Rounding
+
+| Function | Args | Description |
+|---|---|---|
+| `ROUND(x)` | 1 | Round to nearest integer |
+| `ROUNDTO(x, n)` | 2 | Round to `n` decimal places |
+| `CEIL(x)` | 1 | Round up to next integer |
+| `FLOOR(x)` | 1 | Round down to previous integer |
+| `TRUNC(x)` | 1 | Truncate decimal part (towards zero) |
+
+#### Arithmetic
+
+| Function | Args | Description |
+|---|---|---|
+| `POW(base, exp)` | 2 | Exponentiation (`base ^ exp`) |
+| `MOD(a, b)` | 2 | Euclidean remainder (always non-negative) |
+
+#### Aggregation
+
+| Function | Args | Description |
+|---|---|---|
+| `MAX(a, b, ...)` | 2+ | Largest value |
+| `MIN(a, b, ...)` | 2+ | Smallest value |
+| `AVERAGE(a, b, ...)` | 2+ | Arithmetic mean |
+
+#### Conditional
+
+| Function | Args | Description |
+|---|---|---|
+| `IF(cond, then, else)` | 3 | Returns `then` if `cond` is truthy, otherwise `else` |
+
+#### Formatting
+
+| Function | Args | Description |
+|---|---|---|
+| `FORMAT_INDIAN(expr)` | 1 | Indian comma grouping: `12,34,567` |
+| `FORMAT_INTL(expr)` | 1 | International comma grouping: `1,234,567` |
+
+> **Note:** `FORMAT_INDIAN` and `FORMAT_INTL` are special wrappers — they must wrap the **entire** expression. The engine detects the pattern `FORMAT_INDIAN(...)` or `FORMAT_INTL(...)` at the top level, evaluates the inner expression, then applies number formatting to the result.
+
+### Where Formulas Can Be Used
+
+| Context | Scope | Example |
+|---|---|---|
+| **Computed fields** in itemisation rows | Per-row — references sibling columns by label | `{Quantity} * {Unit Price}` |
+| **Summary fields** in itemisations | Cross-row aggregation over one column | SUM of the "Total" column |
+| **Hidden fields** (top-level) | Entire form — references any field by label | `{Subtotal} + {Tax}` |
+| **Hidden fields** (inside itemisation) | Per-row — references sibling columns only | `{Length} * {Breadth} * {Height}` |
+
+---
+
+## Hidden Fields
+
+The `hidden` block type creates invisible form fields whose values are set automatically — either from a static default / URL parameter, or computed from a formula. Hidden field values are included in the webhook submission payload like any other field.
+
+### Two Modes
+
+#### 1. Static Mode
+
+Set a fixed value, optionally overridden by a URL query parameter.
+
+| Property | Type | Description |
+|---|---|---|
+| `defaultValue` | `string` | The value to submit (e.g. `"premium"`) |
+| `queryParam` | `string` | If set, looks for `?key=value` in the page URL and uses that instead |
+
+**Example:** A hidden field with `defaultValue: "organic"` and `queryParam: "utm_source"` will submit `"organic"` — unless the form URL contains `?utm_source=google`, in which case it submits `"google"`.
+
+#### 2. Formula Mode
+
+Set the `expression` property to a formula string. The field's value is recalculated live as the respondent fills out the form.
+
+| Property | Type | Description |
+|---|---|---|
+| `expression` | `string` | Formula string, e.g. `"{Subtotal} * 0.18"` |
+| `format` | `"number"` \| `"currency"` | Output formatting |
+| `currencySymbol` | `string` | Prefix for currency format (default `"$"`) |
+| `decimalPlaces` | `number` | Fixed decimal places (default `2`) |
+
+**Formatting behavior:**
+- `format: "currency"` → output like `$123.45` (symbol + fixed decimals)
+- `format: "number"` → output like `123.45` (fixed decimals, no symbol)
+- `FORMAT_INDIAN(...)` or `FORMAT_INTL(...)` wrapper → comma-grouped string
+- No format → raw number as string
+
+### Hidden Fields — Top Level (Outside Itemisation)
+
+A hidden field placed at the top level of the form (or inside a column layout) can reference **any other field** in the entire form by its label — including fields nested inside column layouts. It cannot reference itself.
+
+The value map is built by `buildTopLevelValueMap()` in `lib/itemisation/expression.ts`, which walks all blocks (including `column_layout` children) and maps each field's label to its current numeric value.
+
+**JSON example:**
+
+```json
+{
+  "id": "blk_tax",
+  "type": "hidden",
+  "properties": {
+    "label": "Tax Amount",
+    "slug": "tax_amount",
+    "expression": "{Subtotal} * 0.18",
+    "format": "currency",
+    "currencySymbol": "₹",
+    "decimalPlaces": 2
+  }
+}
+```
+
+### Hidden Fields — Inside Itemisation
+
+Hidden fields inside an itemisation block are **scoped to their row**. They can only reference sibling columns within the same itemisation row — they cannot see top-level form fields or fields in other rows.
+
+The block ID is namespaced as `{itemisationId}.{rowIndex}.{fieldId}`, and the value map is built by `buildItemisationRowValueMap()` which extracts the row data and maps sibling field labels to their values.
+
+**JSON example** — an itemisation with a hidden computed column:
+
+```json
+{
+  "id": "items",
+  "type": "itemisation",
+  "properties": {
+    "label": "Line Items",
+    "slug": "line_items"
+  },
+  "children": [
+    {
+      "id": "col_desc",
+      "type": "short_text",
+      "properties": { "label": "Description", "slug": "description" }
+    },
+    {
+      "id": "col_qty",
+      "type": "number",
+      "properties": { "label": "Quantity", "slug": "qty" }
+    },
+    {
+      "id": "col_price",
+      "type": "currency",
+      "properties": { "label": "Unit Price", "slug": "unit_price", "currencySymbol": "$" }
+    },
+    {
+      "id": "col_total",
+      "type": "hidden",
+      "properties": {
+        "label": "Line Total",
+        "slug": "line_total",
+        "expression": "{Quantity} * {Unit Price}",
+        "format": "currency",
+        "currencySymbol": "$",
+        "decimalPlaces": 2
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Computed Fields in Itemisation
+
+Computed fields are defined in the itemisation block's `properties.computedFields` array. Each computed field evaluates a formula **per row** using the row's column values and displays the result as a read-only column.
+
+```json
+"computedFields": [
+  {
+    "id": "cf_total",
+    "label": "Total",
+    "expression": "{Quantity} * {Unit Price}",
+    "format": "currency",
+    "currencySymbol": "$",
+    "decimalPlaces": 2
+  }
+]
+```
+
+| Property | Type | Description |
+|---|---|---|
+| `id` | `string` | Unique identifier |
+| `label` | `string` | Column header shown to respondent |
+| `expression` | `string` | Formula referencing sibling column labels |
+| `format` | `"number"` \| `"currency"` | Output format |
+| `currencySymbol` | `string` | Prefix for currency format |
+| `decimalPlaces` | `number` | Fixed decimal places |
+
+Computed fields can also use `FORMAT_INDIAN(...)` or `FORMAT_INTL(...)` wrappers for locale-specific number grouping.
+
+---
+
+## Summary Fields in Itemisation
+
+Summary fields aggregate values **across all rows** of a single column. They appear below the itemisation table.
+
+```json
+"summaryFields": [
+  {
+    "id": "sf_grand",
+    "label": "Grand Total",
+    "aggregation": "SUM",
+    "sourceFieldId": "cf_total",
+    "format": "currency",
+    "currencySymbol": "$",
+    "decimalPlaces": 2
+  }
+]
+```
+
+| Property | Type | Description |
+|---|---|---|
+| `id` | `string` | Unique identifier |
+| `label` | `string` | Label shown below the table |
+| `aggregation` | `"SUM"` \| `"COUNT"` \| `"AVERAGE"` \| `"MIN"` \| `"MAX"` | Aggregation type |
+| `sourceFieldId` | `string` | ID of the column or computed field to aggregate |
+| `format` | `"number"` \| `"currency"` | Output format |
+| `currencySymbol` | `string` | Prefix for currency format |
+| `decimalPlaces` | `number` | Fixed decimal places |
+
+**Aggregation behavior:**
+- `SUM` — sum of all numeric values in the column
+- `COUNT` — number of rows (regardless of column values)
+- `AVERAGE` — arithmetic mean of numeric values
+- `MIN` / `MAX` — smallest / largest numeric value
+- Non-numeric or empty cells are excluded from all aggregations except COUNT
+
+---
+
+## Practical Formula Examples
+
+### Tax calculation (top-level hidden field)
+```
+{Subtotal} * 0.18
+```
+
+### Line item total (computed field or hidden field inside itemisation)
+```
+{Quantity} * {Unit Price}
+```
+
+### Conditional discount
+```
+IF({Quantity} > 10, {Price} * 0.9, {Price})
+```
+
+### Indian-formatted grand total
+```
+FORMAT_INDIAN({Subtotal} + {Tax})
+```
+
+### Volume calculation
+```
+{Length} * {Breadth} * {Height}
+```
+
+### Percentage markup
+```
+{Cost} * (1 + {Markup Percent} / 100)
+```
+
+### Clamped value (minimum 0, maximum 1000)
+```
+MIN(MAX({Value}, 0), 1000)
+```
+
+### Rounded to 2 decimal places
+```
+ROUNDTO({Quantity} * {Unit Price}, 2)
+```
+
+---
+
+## Expression Editor
+
+The expression input field (used in the editor for computed fields, summary fields, and hidden field expressions) includes an autocomplete system:
+
+- **Field autocomplete** — type `{` to see a list of available field labels. The list filters as you type.
+- **Function autocomplete** — start typing a function name (e.g. `ROU`) to see matching functions with their argument signatures and descriptions.
+- **Keyboard navigation** — use Arrow Up / Arrow Down to move through suggestions, Enter or Tab to insert the selected item, Escape to dismiss.
+- **Click to insert** — click any suggestion to insert it at the cursor position.
+
+The autocomplete adapts to context: inside an itemisation, it shows sibling column labels; at the top level, it shows all form field labels.
+
 ## License
 
 MIT

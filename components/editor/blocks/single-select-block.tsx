@@ -15,7 +15,7 @@ export default function SingleSelectField({ block, onChange, readOnly }: EditorB
         <div className="space-y-1.5">
           {options.map((opt, i) => (
             <label key={i} className="flex items-center gap-2 text-sm text-muted-foreground cursor-default">
-              <input type="radio" disabled className="accent-primary" />
+              <input type="radio" disabled checked={opt === p.defaultValue} className="accent-primary" />
               {opt}
             </label>
           ))}
@@ -24,6 +24,7 @@ export default function SingleSelectField({ block, onChange, readOnly }: EditorB
       ) : (
         <select
           disabled
+          value={p.defaultValue ?? ""}
           className={DISABLED_INPUT_CLASS}
         >
           <option value="">{p.placeholder || "Select an option…"}</option>

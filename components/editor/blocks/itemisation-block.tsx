@@ -47,6 +47,7 @@ export default function ItemisationBlock({ block, onChange, readOnly }: EditorBl
               return (
                 <div key={child.id} className="relative group/child">
                   <div
+                    data-child-block-id={child.id}
                     className={`border rounded-[3px] p-2 bg-background cursor-pointer transition-colors ${
                       isChildSelected ? "border-ring ring-1 ring-ring/50" : "border-border hover:border-ring/50"
                     }`}
@@ -55,8 +56,9 @@ export default function ItemisationBlock({ block, onChange, readOnly }: EditorBl
                       selectBlock(child.id);
                       setActivePanel("field-config");
                     }}
+                    onPointerDown={(e) => e.stopPropagation()}
                   >
-                    <BlockRenderer block={child} readOnly={readOnly} />
+                    <BlockRenderer block={child} readOnly />
                   </div>
                   {!readOnly && (
                     <button

@@ -183,6 +183,14 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     icon: "ToggleLeft",
     keywords: ["yes", "no", "boolean", "toggle", "true", "false"],
   },
+  {
+    type: "hidden",
+    label: "Hidden Field",
+    description: "Invisible field for tracking IDs, UTM params, or pre-set values",
+    category: "fields",
+    icon: "EyeOff",
+    keywords: ["hidden", "invisible", "tracking", "utm", "query", "param"],
+  },
 
   // ── Layout ────────────────────────────────────────────────────────────────
   {
