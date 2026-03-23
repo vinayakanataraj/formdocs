@@ -4,6 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Formdocs",
   description: "A Notion-style form builder. Deploy in 60 seconds.",
+  icons: {
+    icon: "/logos/formdocs-symbol-light.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

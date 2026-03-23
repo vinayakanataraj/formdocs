@@ -31,11 +31,8 @@ export default function AdminSidebar() {
   return (
     <div className="w-60 shrink-0 h-screen flex flex-col border-r border-sidebar-border bg-sidebar">
       {/* Workspace header */}
-      <div className="px-3 py-3 flex items-center gap-2 mb-1">
-        <div className="w-5 h-5 rounded-sm bg-foreground/10 flex items-center justify-center shrink-0">
-          <FileText className="w-3 h-3" />
-        </div>
-        <span className="text-sm font-medium truncate">Formdocs</span>
+      <div className="px-3 py-3 mb-1">
+        <img src="/logos/formdocs-logo-light.svg" alt="Formdocs" className="h-6" />
       </div>
 
       {/* New form button */}
