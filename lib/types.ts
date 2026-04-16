@@ -340,6 +340,7 @@ export interface Form {
 
 export interface WebhookPayload {
   meta: {
+    submissionId?: string;
     slug: string;
     title: string;
     submittedAt: string;

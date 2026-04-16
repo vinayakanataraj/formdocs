@@ -165,6 +165,8 @@ async function sendWithRetry(
       return res;
     } catch (err) {
       lastError = err as Error;
+      // Timeout (AbortError) means the request was sent — retrying would duplicate it
+      if (lastError.name === "AbortError") break;
       if (attempt < retries) {
         await new Promise((r) => setTimeout(r, 500 * Math.pow(2, attempt)));
       }
@@ -270,8 +272,10 @@ export async function POST(req: NextRequest, { params }: Params) {
       }
     }
 
+    const submissionId = crypto.randomUUID();
     const payload: WebhookPayload = {
       meta: {
+        submissionId,
         slug: form.meta.slug,
         title: form.meta.title,
         submittedAt: new Date().toISOString(),

@@ -37,19 +37,50 @@ export async function getForm(slug: string): Promise<Form | null> {
   try {
     const res = await get(blobPath(slug), { access: "private" });
     if (!res) return null;
-    return JSON.parse(await new Response(res.stream).text()) as Form;
-  } catch {
+    const text = await new Response(res.stream).text();
+    if (!text) {
+      console.error(`getForm: blob for "${slug}" returned empty content`);
+      return null;
+    }
+    return JSON.parse(text) as Form;
+  } catch (err) {
+    console.error(`getForm: failed to read form "${slug}":`, err);
     return null;
   }
 }
 
 export async function saveForm(form: Form): Promise<void> {
-  await put(blobPath(form.meta.slug), JSON.stringify(form, null, 2), {
+  const content = JSON.stringify(form, null, 2);
+
+  // Guard: refuse to write empty or suspiciously small content
+  if (!content || content.length < 50) {
+    throw new Error(`saveForm: refusing to write ${content.length} bytes for "${form.meta.slug}" — content too small, likely corrupted`);
+  }
+
+  const path = blobPath(form.meta.slug);
+  const result = await put(path, content, {
     access: "private",
     allowOverwrite: true,
     addRandomSuffix: false,
     contentType: "application/json",
   });
+
+  // Verify write: check the blob exists and has non-zero size
+  try {
+    const info = await head(result.url);
+    if (info.size === 0) {
+      // Retry once — the first put may have created metadata without content
+      console.error(`saveForm: blob written with 0 bytes for "${form.meta.slug}", retrying…`);
+      await put(path, content, {
+        access: "private",
+        allowOverwrite: true,
+        addRandomSuffix: false,
+        contentType: "application/json",
+      });
+    }
+  } catch (err) {
+    console.error(`saveForm: write verification failed for "${form.meta.slug}":`, err);
+  }
 }
 
 export async function deleteForm(slug: string): Promise<void> {

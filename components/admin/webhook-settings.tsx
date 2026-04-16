@@ -204,7 +204,7 @@ export default function WebhookSettings() {
           <input
             type="number"
             min={1}
-            max={30}
+            max={60}
             value={wh.timeoutSeconds}
             onChange={(e) => updateWebhook({ timeoutSeconds: parseInt(e.target.value) || 10 })}
             className="w-full px-3 py-2 text-xs border border-border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-ring"
