@@ -59,6 +59,16 @@ export default function HiddenInput({ block, allValues, formBlocks }: Props) {
 
   const computedValue = useMemo(() => {
     if (!p.expression) return undefined;
+
+    // DIMS({Label1}, {Label2}, {Label3}) — format as LxBxH
+    const dimsMatch = p.expression.trim().match(/^DIMS\(\{([^}]+)\},\s*\{([^}]+)\},\s*\{([^}]+)\}\)$/);
+    if (dimsMatch) {
+      const a = valueMap[dimsMatch[1].trim()] ?? 0;
+      const b = valueMap[dimsMatch[2].trim()] ?? 0;
+      const c = valueMap[dimsMatch[3].trim()] ?? 0;
+      return `${a}x${b}x${c}`;
+    }
+
     const { innerExpr, format: wrapperFormat } = extractFormatWrapper(p.expression);
     // Resolve ITEM_* aggregations before evaluating the expression
     const resolved = isInsideItemisation ? innerExpr : resolveItemAggregations(innerExpr, allValues, formBlocks);
